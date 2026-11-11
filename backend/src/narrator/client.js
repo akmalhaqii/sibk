@@ -38,7 +38,7 @@ export async function chat(prompt, { model = env.ollama.model, format } = {}) {
 
 export async function pingOllama() {
   try {
-    return (await fetch(`${env.ollama.url}/api/tags`)).ok ? 'ok' : 'down';
+    return (await fetch(`${env.ollama.url}/api/tags`, { signal: AbortSignal.timeout(800) })).ok ? 'ok' : 'down';
   } catch {
     return 'down';
   }

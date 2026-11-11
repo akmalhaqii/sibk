@@ -1,4 +1,72 @@
 // FR-NAR-02 / FR-TIER-03: setiap angka, tier, dan klaim tren di teks harus ada di data sumber
-export function checkNarrative(text, input) {
-  return { pass: true, unmatched: [] };
+const FORBIDDEN_RE = /\b(beli|jual|tahan|rekomendasi|buy|sell|hold)\b/i;
+
+function collectAllowedNumbers(input = {}) {
+  const allowed = new Set();
+  const addDisplay = (str) => {
+    if (!str || typeof str !== 'string' || str === '—') return;
+    const trimmed = str.trim();
+    allowed.add(trimmed);
+    // Izinkan variasi tanpa awalan Rp atau tanda +
+    const noRp = trimmed.replace(/^Rp\s*/i, '');
+    allowed.add(noRp);
+    allowed.add(noRp.replace(/^\+/, ''));
+  };
+
+  for (const group of [input.profitability, input.liquidity, input.solvency, input.growth_cash]) {
+    if (!group) continue;
+    for (const item of Object.values(group)) {
+      if (item?.display) addDisplay(item.display);
+    }
+  }
+  if (input.valuation) {
+    addDisplay(input.valuation.price);
+    for (const k of ['per', 'pbv', 'ps', 'fair_value', 'premium_discount']) {
+      if (input.valuation[k]?.display) addDisplay(input.valuation[k].display);
+    }
+  }
+  return allowed;
+}
+
+export function checkNarrative(text, input = {}) {
+  if (!text || typeof text !== 'string' || !text.trim()) {
+    return { ok: false, pass: false, unmatched: ['empty_text'], reason: 'empty_text' };
+  }
+
+  if (FORBIDDEN_RE.test(text)) {
+    return { ok: false, pass: false, unmatched: ['forbidden_word'], reason: 'forbidden_word' };
+  }
+
+  // Cek kesesuaian label tier bila kata "tier" disebut
+  const tierMatch = text.match(/\btier\s+(low|mid|high)\b/i);
+  if (tierMatch && input?.tier?.label) {
+    if (tierMatch[1].toLowerCase() !== String(input.tier.label).toLowerCase()) {
+      return { ok: false, pass: false, unmatched: [`tier:${tierMatch[1]}`], reason: 'tier_mismatch' };
+    }
+  }
+
+  // Bersihkan token non-metrik seperti versi model, sumber harga, tanggal, tahun (20xx), dan kuartal (Q1..Q4, 9M, H1)
+  let cleaned = text
+    .replace(/tier_kmeans_v\d+/gi, '')
+    .replace(/yahoo-finance2/gi, '')
+    .replace(/\b\d{4}-\d{2}-\d{2}\b/g, '')
+    .replace(/\b(?:Q[1-4]|H[12]|9M|FY)\b/g, '')
+    .replace(/\b(?:19|20)\d{2}\b/g, '')
+    .replace(/Rp\s*/g, '');
+
+  const allowed = collectAllowedNumbers(input);
+  const tokens = cleaned.match(/[+-]?\d[\d.,]*\s?[%x]?/g) || [];
+  const unmatched = [];
+
+  for (const rawTok of tokens) {
+    const tok = rawTok.trim().replace(/[.,]+$/, '');
+    if (!tok) continue;
+    const tokNoPlus = tok.replace(/^\+/, '');
+    if (!allowed.has(tok) && !allowed.has(tokNoPlus)) {
+      unmatched.push(tok);
+    }
+  }
+
+  const pass = unmatched.length === 0;
+  return { ok: pass, pass, unmatched };
 }

@@ -5,15 +5,35 @@ try {
   yahooFinance.suppressNotices?.(['yahooSurvey']);
 } catch {}
 
+let cooldownUntil = 0;
+
 export async function fetchPrice(ticker) {
   if (!ticker) throw new Error('ticker kosong');
+  if (Date.now() < cooldownUntil) {
+    throw new Error('harga pasar sedang tidak tersedia (cooldown)');
+  }
   const clean = String(ticker).trim().toUpperCase().replace(/\.JK$/i, '');
   const symbol = `${clean}.JK`;
 
-  const q = await Promise.race([
-    yahooFinance.quote(symbol),
-    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000)),
-  ]);
+  let timer;
+  const quotePromise = yahooFinance.quote(symbol);
+  // Cegah unhandled rejection jika timeout lebih dulu selesai
+  quotePromise.catch(() => {});
+
+  let q;
+  try {
+    q = await Promise.race([
+      quotePromise,
+      new Promise((_, rej) => {
+        timer = setTimeout(() => rej(new Error('timeout')), 5000);
+      }),
+    ]);
+  } catch (err) {
+    cooldownUntil = Date.now() + 60_000;
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!q?.regularMarketPrice) throw new Error('harga tidak tersedia');
 

@@ -1,1 +1,7 @@
-{ "source": "template", "label": "Ringkasan otomatis (tanpa AI)", "text": "", "checks_passed": true }
+{
+  "source": "template",
+  "label": "Ringkasan otomatis (tanpa AI)",
+  "text": "Profitabilitas: ROE 0,7% (lemah), ROA 0,4% (lemah), dan margin laba bersih 0,8% (lemah).\n\nLikuiditas dan solvabilitas: current ratio 1,14x (waspada), DER 0,55x (waspada), dan liabilitas terhadap aset 34,5% (sehat).\n\nPertumbuhan dan arus kas: pendapatan tumbuh 8,3% (waspada) dan laba pemilik entitas induk tumbuh 88,7% (sehat) dibanding periode yang sama tahun lalu; arus kas operasi 8,95x laba bersih (sehat).\n\nValuasi: pada harga Rp3.000 (yahoo-finance2), PER 63,03x dan PBV 0,47x; harga +14,1% terhadap nilai wajar Graham Rp2.628.\n\nTier performa: model klaster tier_kmeans_v1 menempatkan SMGR pada tier mid, relatif terhadap emiten non-keuangan BEI periode Q1 2025.\n\nKeterbatasan: ROE, ROA, dan valuasi berbasis laba disetahunkan dari laporan kuartalan. Jumlah saham belum dikurangi saham treasuri.",
+  "checks_passed": true,
+  "prompt_version": "narrative_v1"
+}
