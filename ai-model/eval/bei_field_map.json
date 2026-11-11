@@ -1,6 +1,34 @@
 {
-  "_note": "Kode/label taksonomi BEI -> field kanonik (sama dengan backend/config/labels.json). Isi setelah membuka Excel SMGR.",
-  "1210000": {},
-  "1311000": {},
-  "1510000": {}
+  "_note": "Label taksonomi BEI (sheet 1210000, 1311000, 1510000) -> field kanonik (sama dengan backend/config/labels.json).",
+  "1210000": {
+    "Kas dan setara kas": "cash_and_equivalents",
+    "Persediaan lancar": "inventories",
+    "Jumlah aset lancar": "current_assets",
+    "Aset tetap": "fixed_assets",
+    "Jumlah aset tidak lancar": "non_current_assets",
+    "Jumlah aset": "total_assets",
+    "Jumlah liabilitas jangka pendek": "current_liabilities",
+    "Jumlah liabilitas jangka panjang": "non_current_liabilities",
+    "Jumlah liabilitas": "total_liabilities",
+    "Saham biasa": "share_capital",
+    "Saham treasuri": "treasury_shares",
+    "Saldo laba yang belum ditentukan penggunaannya": "retained_earnings",
+    "Jumlah ekuitas yang diatribusikan kepada pemilik entitas induk": "equity_parent",
+    "Jumlah ekuitas": "total_equity"
+  },
+  "1311000": {
+    "Penjualan dan pendapatan usaha": "revenue",
+    "Beban pokok penjualan dan pendapatan": "cost_of_revenue",
+    "Jumlah laba bruto": "gross_profit",
+    "Jumlah laba (rugi) sebelum pajak penghasilan": "profit_before_tax",
+    "Jumlah laba (rugi)": "net_income",
+    "Laba (rugi) yang dapat diatribusikan ke entitas induk": "net_income_parent",
+    "Laba (rugi) per saham dasar dari operasi yang dilanjutkan": "eps_basic"
+  },
+  "1510000": {
+    "Jumlah arus kas bersih yang diperoleh dari (digunakan untuk) aktivitas operasi": "operating_cash_flow",
+    "Jumlah arus kas bersih yang diperoleh dari (digunakan untuk) aktivitas investasi": "investing_cash_flow",
+    "Jumlah arus kas bersih yang diperoleh dari (digunakan untuk) aktivitas pendanaan": "financing_cash_flow",
+    "Pembayaran untuk perolehan aset tetap": "capex"
+  }
 }

@@ -11,14 +11,14 @@ paths:
   parser_output_dir: ../data/processed/parser_output
   ground_truth_dir: ../data/ground_truth/bei_excel
   bei_excel_dir: ../data/raw/bei_excel
-# R-05: selaras dengan Desain MVP ("Fitur turunan") — tidak bergantung pada aset_lancar
+# Fitur klaster terkunci (B1.5): dapat dihitung baik dari Excel BEI (1210000/1311000/1510000) maupun dari PDF
 features:
   - roa
   - roe
   - liability_to_asset
   - net_margin
+  - current_ratio
   - revenue_growth
-  - earnings_growth
   - cash_conversion
 exclude_tickers: [SMGR]        # emiten demo tidak ikut dilatih (out-of-sample)
 holdout_ratio: 0.1

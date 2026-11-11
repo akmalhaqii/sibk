@@ -11,7 +11,7 @@
   },
   "fields": {
     "inventories": { "value": 4902594, "prior": 4913825, "page": 4, "label": "Persediaan", "confidence": 1.0 },
-    "total_assets": { "value": 75459729, "prior": 76568724, "page": 5, "label": "Jumlah Aset", "confidence": 1.0 }
+    "total_assets": { "value": 75459729, "prior": 76568724, "page": 4, "label": "JUMLAH ASET", "confidence": 1.0 }
   },
   "validation": {
     "checks": [{ "name": "balance_identity", "lhs": 75459729, "rhs": 75459729, "terms": ["liabilities", "temporary_syirkah", "equity"], "pass": true }],
@@ -30,7 +30,7 @@
     "tier": "mid",
     "cluster": 1,
     "distance_to_centroid": 0.0,
-    "features": ["roa", "roe", "liability_to_asset", "net_margin", "revenue_growth", "earnings_growth", "cash_conversion"],
+    "features": ["roa", "roe", "liability_to_asset", "net_margin", "current_ratio", "revenue_growth", "cash_conversion"],
     "model_version": "tier_kmeans_v1"
   },
   "market": { "price": 0.0, "currency": "IDR", "fetched_at": "2026-11-10T09:00:00+07:00", "source": "yahoo-finance2" },

@@ -1,4 +1,8 @@
 {
+  "cash": [
+    "Kas dan setara kas",
+    "Cash and cash equivalents"
+  ],
   "cash_and_equivalents": [
     "Kas dan setara kas",
     "Cash and cash equivalents"
@@ -14,6 +18,15 @@
     "Total aset lancar",
     "Total current assets"
   ],
+  "non_current_assets": [
+    "Jumlah aset tidak lancar",
+    "Total aset tidak lancar",
+    "Total non-current assets"
+  ],
+  "fixed_assets": [
+    "Aset tetap",
+    "Fixed assets"
+  ],
   "total_assets": [
     "Jumlah aset",
     "Total aset",
@@ -25,6 +38,11 @@
     "Jumlah kewajiban lancar",
     "Total current liabilities"
   ],
+  "non_current_liabilities": [
+    "Jumlah liabilitas jangka panjang",
+    "Total liabilitas jangka panjang",
+    "Total non-current liabilities"
+  ],
   "total_liabilities": [
     "Jumlah liabilitas",
     "Total liabilitas",
@@ -35,46 +53,65 @@
     "Jumlah dana syirkah temporer",
     "Temporary syirkah funds"
   ],
+  "share_capital": [
+    "Modal saham",
+    "Modal ditempatkan dan disetor penuh",
+    "Share capital",
+    "Issued and fully paid"
+  ],
+  "treasury_shares": [
+    "Modal saham yang diperoleh kembali",
+    "Saham treasuri",
+    "Saham diperoleh kembali",
+    "Treasury stock",
+    "Treasury shares"
+  ],
+  "retained_earnings": [
+    "Belum dicadangkan",
+    "Saldo laba belum dicadangkan",
+    "Unappropriated"
+  ],
   "equity_parent": [
-    "Ekuitas yang dapat diatribusikan kepada pemilik entitas induk",
     "Jumlah ekuitas yang dapat diatribusikan kepada pemilik entitas induk",
-    "Equity attributable to owners of the parent entity",
-    "Total equity attributable to owners of the parent"
+    "Ekuitas yang dapat diatribusikan kepada pemilik entitas induk",
+    "Total equity attributable to the owners of the parent entity",
+    "Equity attributable to owners of the parent entity"
   ],
   "total_equity": [
     "Jumlah ekuitas",
     "Total ekuitas",
     "Total equity"
   ],
-  "issued_and_paid_shares": [
-    "Modal ditempatkan dan disetor penuh",
-    "Modal saham - ditempatkan dan disetor penuh",
-    "Issued and fully paid share capital"
-  ],
-  "treasury_shares": [
-    "Saham treasuri",
-    "Saham diperoleh kembali",
-    "Treasury stock",
-    "Treasury shares"
-  ],
   "revenue": [
     "Pendapatan",
     "Pendapatan usaha",
     "Penjualan bersih",
-    "Revenue",
     "Revenues",
+    "Revenue",
     "Net sales"
   ],
+  "cost_of_revenue": [
+    "Beban pokok pendapatan",
+    "Beban pokok penjualan",
+    "Cost of revenues",
+    "Cost of sales"
+  ],
   "gross_profit": [
-    "Laba bruto",
     "Laba kotor",
+    "Laba bruto",
     "Gross profit"
   ],
-  "operating_income": [
+  "operating_profit": [
     "Laba usaha",
     "Laba operasi",
     "Operating profit",
     "Operating income"
+  ],
+  "profit_before_tax": [
+    "Laba sebelum pajak penghasilan",
+    "Laba sebelum pajak",
+    "Profit before income tax expense",
+    "Profit before tax"
   ],
   "net_income": [
     "Laba periode berjalan",
@@ -85,26 +122,37 @@
     "Net income"
   ],
   "net_income_parent": [
+    "Laba periode berjalan yang diatribusikan kepada - pemilik entitas induk",
     "Laba periode berjalan yang dapat diatribusikan kepada pemilik entitas induk",
     "Laba tahun berjalan yang dapat diatribusikan kepada pemilik entitas induk",
     "Profit for the period attributable to owners of the parent entity",
     "Profit attributable to owners of the parent"
   ],
   "eps_basic": [
+    "Laba per saham (dinyatakan dalam rupiah penuh) dasar dan dilusian",
+    "Laba per saham dasar dan dilusian",
     "Laba per saham dasar",
-    "Laba bersih per saham dasar",
+    "Basic and diluted",
     "Basic earnings per share"
   ],
   "operating_cash_flow": [
+    "Arus kas bersih yang diperoleh dari aktivitas operasi",
     "Kas bersih diperoleh dari aktivitas operasi",
-    "Arus kas bersih diperoleh dari aktivitas operasi",
     "Kas bersih dari aktivitas operasi",
-    "Net cash provided by operating activities",
-    "Net cash flows from operating activities"
+    "Net cash flows provided by operating activities",
+    "Net cash provided by operating activities"
   ],
-  "depreciation_amortization": [
-    "Penyusutan dan amortisasi",
-    "Beban penyusutan dan amortisasi",
-    "Depreciation and amortization"
+  "investing_cash_flow": [
+    "Arus kas bersih yang digunakan untuk aktivitas investasi",
+    "Net cash flows used in investing activities"
+  ],
+  "financing_cash_flow": [
+    "Arus kas bersih yang digunakan untuk aktivitas pendanaan",
+    "Net cash flows used in financing activities"
+  ],
+  "capex": [
+    "Pembelian aset tetap",
+    "Perolehan aset tetap",
+    "Acquisition of fixed assets"
   ]
 }
