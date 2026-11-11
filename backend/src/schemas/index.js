@@ -64,6 +64,7 @@ export const Tiering = z.object({
   distance_to_centroid: nullableNumber,
   features: z.array(z.string()),
   model_version: z.string().nullable(), // tampil di UI (FR-TIER-02)
+  reason: z.string().optional(),
 });
 
 export const Market = z.object({

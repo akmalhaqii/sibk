@@ -31,7 +31,7 @@ export async function runPipeline({ file, ticker, shares }) {
 
 export async function recompute({ entity, fields, shares, ticker, price }) {
   const validation = validate(fields); // R-02: selalu hitung ulang validasi dari fields terkini
-  const metrics = computeMetrics(fields);
+  const metrics = computeMetrics(fields, entity);
   const tiering = assignTier(metrics);
   const resolvedTicker = ticker ?? entity?.ticker;
   const market =

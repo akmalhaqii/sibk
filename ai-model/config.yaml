@@ -1,7 +1,7 @@
-period_end: "2026-03-31"
+period_end: "2025-03-31"
 model_version: tier_kmeans_v1     # ditulis ke JSON model, tampil di UI (FR-TIER-02)
 paths:
-  raw_excel_dir: ../data/raw/bei_excel_bulk
+  raw_excel_dir: ../data/raw/Financial_Statement_2025_Q2
   raw_csv: ../data/processed/raw_bei.csv
   features_csv: ../data/processed/features.csv
   excluded_log: ../data/processed/excluded_rows.csv
@@ -11,15 +11,8 @@ paths:
   parser_output_dir: ../data/processed/parser_output
   ground_truth_dir: ../data/ground_truth/bei_excel
   bei_excel_dir: ../data/raw/bei_excel
-# Fitur klaster terkunci (B1.5): dapat dihitung baik dari Excel BEI (1210000/1311000/1510000) maupun dari PDF
-features:
-  - roa
-  - roe
-  - liability_to_asset
-  - net_margin
-  - current_ratio
-  - revenue_growth
-  - cash_conversion
+# Fitur klaster final (Bagian 6.2 Brief Tahap 2): ocf_to_assets menggantikan cash_conversion agar emiten rugi tetap masuk sampel
+features: [roa, roe, liability_to_asset, net_margin, current_ratio, revenue_growth, ocf_to_assets]
 exclude_tickers: [SMGR]        # emiten demo tidak ikut dilatih (out-of-sample)
 holdout_ratio: 0.1
 winsorize: [0.01, 0.99]

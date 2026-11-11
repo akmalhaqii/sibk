@@ -5,7 +5,6 @@ import labels from '../../config/labels.json' with { type: 'json' };
 
 const FIELD_STATEMENT = {
   cash: 'posisi_keuangan',
-  cash_and_equivalents: 'posisi_keuangan',
   inventories: 'posisi_keuangan',
   current_assets: 'posisi_keuangan',
   non_current_assets: 'posisi_keuangan',
@@ -34,10 +33,6 @@ const FIELD_STATEMENT = {
   capex: 'arus_kas',
 };
 
-const ALIAS_GROUPS = [
-  ['cash', 'cash_and_equivalents'],
-];
-
 export function normalizeLabel(s) {
   return String(s || '')
     .toLowerCase()
@@ -52,7 +47,6 @@ function scoreCandidate(row, synNorm, isTotalField) {
     if (cand === synNorm) return 1.0;
   }
   for (const cand of candidates) {
-    // Jangan biarkan "jumlah liabilitas jangka pendek" cocok dengan "jumlah liabilitas"
     if (isTotalField && cand !== synNorm) {
       if (synNorm === 'jumlah liabilitas' || synNorm === 'total liabilities') continue;
       if (synNorm === 'jumlah aset' || synNorm === 'total assets') continue;
@@ -76,7 +70,6 @@ function extractShareCountFromLabel(rows) {
     if (r.statement && r.statement !== 'posisi_keuangan') continue;
     const text = r.label || '';
     if (!/modal\s+ditempatkan\s+dan\s+disetor/i.test(text)) continue;
-    // Cari bagian setelah "Modal ditempatkan dan disetor penuh"
     const sub = text.split(/modal\s+ditempatkan\s+dan\s+disetor(?:\s+penuh)?/i)[1] || text;
     const matches = [...sub.matchAll(/(\d{1,3}(?:[.,]\d{3})+|\d+)\s*lembar\s+saham/gi)];
     if (matches.length > 0) {
@@ -126,7 +119,7 @@ export function mapFields(rows = [], { ticker = 'UNKNOWN' } = {}) {
       if (
         !best ||
         rowBestScore > best.score ||
-        (rowBestScore === best.score && isTotalField) // untuk baris "Jumlah ...", pilih yang terakhir bila skor sama
+        (rowBestScore === best.score && isTotalField)
       ) {
         best = { idx, row: r, score: rowBestScore };
       }
@@ -144,17 +137,6 @@ export function mapFields(rows = [], { ticker = 'UNKNOWN' } = {}) {
     }
   }
 
-  // Sinkronkan alias (mis. cash <-> cash_and_equivalents)
-  for (const group of ALIAS_GROUPS) {
-    const found = group.find((k) => fields[k]);
-    if (found) {
-      for (const k of group) {
-        if (!fields[k]) fields[k] = { ...fields[found] };
-      }
-    }
-  }
-
-  // Ekstrak jumlah lembar saham beredar dari keterangan modal ditempatkan & disetor bila ada (FR-MKT-04)
   const shareCount = extractShareCountFromLabel(rows);
   if (shareCount) {
     fields.issued_and_paid_shares = shareCount;

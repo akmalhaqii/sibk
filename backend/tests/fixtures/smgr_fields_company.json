@@ -1,10 +1,39 @@
 {
-  "entity": { "ticker": "SMGR", "period_end": "2026-03-31", "unit": "juta IDR", "locale": "id-dot", "source": "company_pdf" },
+  "entity": {
+    "ticker": "SMGR",
+    "period_end": "2026-03-31",
+    "period_type": "Q1",
+    "unit": "juta IDR",
+    "locale": "id-dot",
+    "source": "company_pdf"
+  },
   "fields": {
+    "cash": { "value": 4701897, "prior": 4644221, "page": 4, "label": "Kas dan setara kas", "confidence": 1.0 },
     "inventories": { "value": 4902594, "prior": 4913825, "page": 4, "label": "Persediaan", "confidence": 1.0 },
-    "total_assets": { "value": 75459729, "prior": 76568724, "page": 5, "label": "Jumlah aset", "confidence": 1.0 },
-    "total_liabilities": { "value": 26067683, "prior": null, "page": 5, "label": "Jumlah liabilitas", "confidence": 1.0 },
-    "temporary_syirkah": { "value": 1600000, "prior": null, "page": 5, "label": "Dana syirkah temporer", "confidence": 1.0 },
-    "total_equity": { "value": 47792046, "prior": null, "page": 5, "label": "Jumlah ekuitas", "confidence": 1.0 }
+    "current_assets": { "value": 16925924, "prior": 17430795, "page": 4, "label": "Jumlah Aset Lancar", "confidence": 1.0 },
+    "non_current_assets": { "value": 58533805, "prior": 59137929, "page": 4, "label": "Jumlah Aset Tidak Lancar", "confidence": 1.0 },
+    "fixed_assets": { "value": 53361494, "prior": 53906254, "page": 4, "label": "Aset tetap", "confidence": 1.0 },
+    "total_assets": { "value": 75459729, "prior": 76568724, "page": 4, "label": "JUMLAH ASET", "confidence": 1.0 },
+    "current_liabilities": { "value": 14804008, "prior": 15837335, "page": 5, "label": "Jumlah Liabilitas Jangka Pendek", "confidence": 1.0 },
+    "non_current_liabilities": { "value": 11263675, "prior": 11311674, "page": 5, "label": "Jumlah Liabilitas Jangka Panjang", "confidence": 1.0 },
+    "total_liabilities": { "value": 26067683, "prior": 27149009, "page": 5, "label": "Jumlah Liabilitas", "confidence": 1.0 },
+    "temporary_syirkah": { "value": 1600000, "prior": 1700000, "page": 5, "label": "DANA SYIRKAH TEMPORER", "confidence": 1.0 },
+    "share_capital": { "value": 675154, "prior": 675154, "page": 6, "label": "Modal ditempatkan dan disetor penuh", "confidence": 0.8 },
+    "treasury_shares": { "value": -40039, "prior": -40039, "page": 6, "label": "Modal saham yang diperoleh kembali", "confidence": 1.0 },
+    "retained_earnings": { "value": 34506641, "prior": 34426299, "page": 6, "label": "Belum dicadangkan", "confidence": 1.0 },
+    "equity_parent": { "value": 43547271, "prior": 43464113, "page": 6, "label": "Jumlah ekuitas yang dapat diatribusikan kepada pemilik entitas induk", "confidence": 1.0 },
+    "total_equity": { "value": 47792046, "prior": 47719715, "page": 6, "label": "Jumlah Ekuitas", "confidence": 1.0 },
+    "revenue": { "value": 8288486, "prior": 7654749, "page": 7, "label": "PENDAPATAN", "confidence": 1.0 },
+    "cost_of_revenue": { "value": -6619196, "prior": -6093389, "page": 7, "label": "BEBAN POKOK PENDAPATAN", "confidence": 1.0 },
+    "gross_profit": { "value": 1669290, "prior": 1561360, "page": 7, "label": "LABA KOTOR", "confidence": 1.0 },
+    "profit_before_tax": { "value": 156303, "prior": 101569, "page": 7, "label": "LABA SEBELUM PAJAK PENGHASILAN", "confidence": 1.0 },
+    "net_income": { "value": 66616, "prior": 35432, "page": 7, "label": "LABA PERIODE BERJALAN", "confidence": 1.0 },
+    "net_income_parent": { "value": 80342, "prior": 42580, "page": 7, "label": "LABA PERIODE BERJALAN YANG DIATRIBUSIKAN KEPADA - Pemilik entitas induk", "confidence": 1.0 },
+    "eps_basic": { "value": 12, "prior": 6, "page": 7, "label": "Laba per saham (dinyatakan dalam Rupiah penuh) Dasar dan dilusian", "confidence": 1.0 },
+    "operating_cash_flow": { "value": 596450, "prior": 354642, "page": 9, "label": "Arus kas bersih yang diperoleh dari aktivitas operasi", "confidence": 1.0 },
+    "investing_cash_flow": { "value": -190904, "prior": -101370, "page": 9, "label": "Arus kas bersih yang digunakan untuk aktivitas investasi", "confidence": 1.0 },
+    "financing_cash_flow": { "value": -355017, "prior": -199672, "page": 9, "label": "Arus kas bersih yang digunakan untuk aktivitas pendanaan", "confidence": 1.0 },
+    "capex": { "value": -187307, "prior": -113436, "page": 9, "label": "Pembelian aset tetap", "confidence": 1.0 },
+    "issued_and_paid_shares": { "value": 6751540090, "prior": 6751540090, "page": 6, "label": "Modal ditempatkan dan disetor penuh - 1 lembar Seri A Dwiwarna dan 6.751.540.089 lembar Seri B", "confidence": 1.0 }
   }
 }
