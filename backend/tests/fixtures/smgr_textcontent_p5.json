@@ -1,0 +1,15 @@
+{
+  "_note": "Angka asli SMGR Q1 2026 (juta IDR). Koordinat transform dan nomor halaman SINTETIS.",
+  "page": 5,
+  "items": [
+    { "str": "Jumlah aset", "transform": [9, 0, 0, 9, 56, 612], "width": 52 },
+    { "str": "75.459.729", "transform": [9, 0, 0, 9, 420, 612], "width": 48 },
+    { "str": "76.568.724", "transform": [9, 0, 0, 9, 500, 612], "width": 48 },
+    { "str": "Jumlah liabilitas", "transform": [9, 0, 0, 9, 56, 400], "width": 72 },
+    { "str": "26.067.683", "transform": [9, 0, 0, 9, 420, 400], "width": 48 },
+    { "str": "Dana syirkah temporer", "transform": [9, 0, 0, 9, 56, 380], "width": 96 },
+    { "str": "1.600.000", "transform": [9, 0, 0, 9, 420, 380], "width": 44 },
+    { "str": "Jumlah ekuitas", "transform": [9, 0, 0, 9, 56, 200], "width": 64 },
+    { "str": "47.792.046", "transform": [9, 0, 0, 9, 420, 200], "width": 48 }
+  ]
+}

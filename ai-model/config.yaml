@@ -1,0 +1,28 @@
+period_end: "2026-03-31"
+model_version: tier_kmeans_v1     # ditulis ke JSON model, tampil di UI (FR-TIER-02)
+paths:
+  raw_excel_dir: ../data/raw/bei_excel_bulk
+  raw_csv: ../data/processed/raw_bei.csv
+  features_csv: ../data/processed/features.csv
+  excluded_log: ../data/processed/excluded_rows.csv
+  model_out: models/tier_kmeans.json
+  model_export: ../backend/models/tier_kmeans.json
+  reports_dir: reports
+  parser_output_dir: ../data/processed/parser_output
+  ground_truth_dir: ../data/ground_truth/bei_excel
+  bei_excel_dir: ../data/raw/bei_excel
+# R-05: selaras dengan Desain MVP ("Fitur turunan") — tidak bergantung pada aset_lancar
+features:
+  - roa
+  - roe
+  - liability_to_asset
+  - net_margin
+  - revenue_growth
+  - earnings_growth
+  - cash_conversion
+exclude_tickers: [SMGR]        # emiten demo tidak ikut dilatih (out-of-sample)
+holdout_ratio: 0.1
+winsorize: [0.01, 0.99]
+balance_tolerance: 1
+kmeans: { k: 3, seeds: [0, 1, 2, 3, 4], n_init: 20 }
+gmm: { n_components: 3 }

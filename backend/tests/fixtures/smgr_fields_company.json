@@ -1,0 +1,10 @@
+{
+  "entity": { "ticker": "SMGR", "period_end": "2026-03-31", "unit": "juta IDR", "locale": "id-dot", "source": "company_pdf" },
+  "fields": {
+    "inventories": { "value": 4902594, "prior": 4913825, "page": 4, "label": "Persediaan", "confidence": 1.0 },
+    "total_assets": { "value": 75459729, "prior": 76568724, "page": 5, "label": "Jumlah aset", "confidence": 1.0 },
+    "total_liabilities": { "value": 26067683, "prior": null, "page": 5, "label": "Jumlah liabilitas", "confidence": 1.0 },
+    "temporary_syirkah": { "value": 1600000, "prior": null, "page": 5, "label": "Dana syirkah temporer", "confidence": 1.0 },
+    "total_equity": { "value": 47792046, "prior": null, "page": 5, "label": "Jumlah ekuitas", "confidence": 1.0 }
+  }
+}

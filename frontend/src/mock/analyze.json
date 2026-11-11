@@ -1,0 +1,40 @@
+{
+  "entity": {
+    "ticker": "SMGR",
+    "period_end": "2026-03-31",
+    "period_type": "Q1",
+    "unit": "juta IDR",
+    "locale": "id-dot",
+    "source": "company_pdf",
+    "file_id": "smgr-demo",
+    "file_url": "/files/smgr-demo.pdf"
+  },
+  "fields": {
+    "inventories": { "value": 4902594, "prior": 4913825, "page": 4, "label": "Persediaan", "confidence": 1.0 },
+    "total_assets": { "value": 75459729, "prior": 76568724, "page": 5, "label": "Jumlah Aset", "confidence": 1.0 }
+  },
+  "validation": {
+    "checks": [{ "name": "balance_identity", "lhs": 75459729, "rhs": 75459729, "terms": ["liabilities", "temporary_syirkah", "equity"], "pass": true }],
+    "needs_review": false
+  },
+  "metrics": {
+    "current_ratio": {
+      "value": 0.0,
+      "display": "0,00x",
+      "status": null,
+      "formula": "current_assets / current_liabilities",
+      "inputs": ["current_assets", "current_liabilities"]
+    }
+  },
+  "tiering": {
+    "tier": "mid",
+    "cluster": 1,
+    "distance_to_centroid": 0.0,
+    "features": ["roa", "roe", "liability_to_asset", "net_margin", "revenue_growth", "earnings_growth", "cash_conversion"],
+    "model_version": "tier_kmeans_v1"
+  },
+  "market": { "price": 0.0, "currency": "IDR", "fetched_at": "2026-11-10T09:00:00+07:00", "source": "yahoo-finance2" },
+  "valuation": {
+    "pbv": { "value": 0.0, "display": "0,00x", "inputs": ["price", "shares", "equity_parent"], "annualized": false }
+  }
+}

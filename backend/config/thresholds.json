@@ -1,0 +1,63 @@
+{
+  "current_ratio": {
+    "formula": "current_assets / current_liabilities",
+    "direction": "higher_better",
+    "low": 1.0,
+    "high": 2.0
+  },
+  "der": {
+    "formula": "total_liabilities / total_equity",
+    "direction": "lower_better",
+    "low": 0.5,
+    "high": 2.0
+  },
+  "liability_to_asset": {
+    "formula": "total_liabilities / total_assets",
+    "direction": "lower_better",
+    "low": 0.4,
+    "high": 0.65
+  },
+  "roa": {
+    "formula": "net_income / avg(total_assets)",
+    "direction": "higher_better",
+    "low": 0.03,
+    "high": 0.08
+  },
+  "roe": {
+    "formula": "net_income / avg(total_equity)",
+    "direction": "higher_better",
+    "low": 0.05,
+    "high": 0.15
+  },
+  "net_margin": {
+    "formula": "net_income / revenue",
+    "direction": "higher_better",
+    "low": 0.05,
+    "high": 0.15
+  },
+  "operating_margin": {
+    "formula": "operating_income / revenue",
+    "direction": "higher_better",
+    "low": 0.08,
+    "high": 0.18
+  },
+  "cash_conversion": {
+    "formula": "operating_cash_flow / net_income",
+    "direction": "higher_better",
+    "low": 0.8,
+    "high": 1.2
+  },
+  "revenue_growth": {
+    "formula": "revenue / revenue_prior - 1",
+    "direction": "higher_better",
+    "low": 0.0,
+    "high": 0.1
+  },
+  "earnings_growth": {
+    "formula": "net_income / net_income_prior - 1",
+    "direction": "higher_better",
+    "low": 0.0,
+    "high": 0.1
+  },
+  "balance_tolerance": 1
+}

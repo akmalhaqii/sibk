@@ -1,0 +1,31 @@
+{
+  "model_version": "tier_kmeans_fixture",
+  "created_at": "2026-11-12T00:00:00+07:00",
+  "algorithm": "kmeans",
+  "period_end": "2026-03-31",
+  "n_samples": 30,
+  "features": [
+    "roa",
+    "roe",
+    "liability_to_asset",
+    "net_margin",
+    "revenue_growth",
+    "earnings_growth",
+    "cash_conversion"
+  ],
+  "winsor": {
+    "lower": [-0.3, -0.5, 0.05, -0.5, -0.5, -0.8, -1.0],
+    "upper": [0.4, 0.6, 0.9, 0.5, 1.5, 2.0, 3.0]
+  },
+  "scaler": {
+    "mean": [0.05, 0.08, 0.45, 0.07, 0.05, 0.06, 0.9],
+    "scale": [0.06, 0.1, 0.2, 0.08, 0.2, 0.3, 0.5]
+  },
+  "centroids": [
+    [-1.0, -1.0, 1.0, -1.0, -0.7, -0.7, -0.8],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [1.2, 1.2, -0.8, 1.1, 0.8, 0.8, 0.9]
+  ],
+  "tier_by_cluster": ["low", "mid", "high"],
+  "evaluation": { "silhouette": 0.0, "davies_bouldin": 0.0 }
+}

@@ -1,0 +1,8 @@
+{
+  "entity": { "ticker": "SMGR", "period_end": "2026-03-31", "unit": "juta IDR", "locale": "en-comma", "source": "bei_pdf" },
+  "fields": {
+    "total_assets": { "value": 75459729, "prior": 76568724, "page": 5, "label": "Total assets", "confidence": 1.0 },
+    "total_liabilities": { "value": 27667683, "prior": null, "page": 5, "label": "Total liabilities", "confidence": 1.0 },
+    "total_equity": { "value": 47792046, "prior": null, "page": 5, "label": "Total equity", "confidence": 1.0 }
+  }
+}

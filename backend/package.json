@@ -1,0 +1,24 @@
+{
+  "name": "telusurfin-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "export:parser": "node --env-file-if-exists=.env scripts/export_parser_output.js",
+    "build:features": "node --env-file-if-exists=.env scripts/build_features.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "decimal.js": "^10.4.3",
+    "express": "^4.19.2",
+    "fastest-levenshtein": "^1.0.16",
+    "multer": "^1.4.5-lts.1",
+    "pdfjs-dist": "^4.5.136",
+    "yahoo-finance2": "^2.13.0",
+    "zod": "^3.23.8"
+  }
+}

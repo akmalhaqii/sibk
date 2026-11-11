@@ -1,0 +1,6 @@
+[
+  { "label": "Jumlah aset", "value": 75459729, "prior": 76568724, "page": 5, "statement": "posisi_keuangan" },
+  { "label": "Jumlah liabilitas", "value": 26067683, "prior": null, "page": 5, "statement": "posisi_keuangan" },
+  { "label": "Dana syirkah temporer", "value": 1600000, "prior": null, "page": 5, "statement": "posisi_keuangan" },
+  { "label": "Jumlah ekuitas", "value": 47792046, "prior": null, "page": 5, "statement": "posisi_keuangan" }
+]

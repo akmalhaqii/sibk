@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# data tidak masuk git (hanya struktur folder)
+data/**
+!data/**/
+!data/**/.gitkeep
+!data/README.md
+
+backend/logs/
