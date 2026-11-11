@@ -15,7 +15,7 @@ paths:
 features: [roa, roe, liability_to_asset, net_margin, current_ratio, revenue_growth, ocf_to_assets]
 exclude_tickers: [SMGR]        # emiten demo tidak ikut dilatih (out-of-sample)
 holdout_ratio: 0.1
-winsorize: [0.01, 0.99]
+winsorize: [0.02, 0.98]
 balance_tolerance: 1
 kmeans: { k: 3, seeds: [0, 1, 2, 3, 4], n_init: 20 }
 gmm: { n_components: 3 }

@@ -1,6 +1,10 @@
 // FR-MKT: harga saat inferensi via yahoo-finance2 (TICKER.JK); catat sumber & timestamp.
 import yahooFinance from 'yahoo-finance2';
 
+try {
+  yahooFinance.suppressNotices?.(['yahooSurvey']);
+} catch {}
+
 export async function fetchPrice(ticker) {
   if (!ticker) throw new Error('ticker kosong');
   const clean = String(ticker).trim().toUpperCase().replace(/\.JK$/i, '');

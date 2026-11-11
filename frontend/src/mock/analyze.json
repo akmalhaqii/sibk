@@ -62,8 +62,8 @@
   },
   "tiering": {
     "tier": "mid",
-    "cluster": 1,
-    "distance_to_centroid": 1.24,
+    "cluster": 0,
+    "distance_to_centroid": 0.6181,
     "features": ["roa", "roe", "liability_to_asset", "net_margin", "current_ratio", "revenue_growth", "ocf_to_assets"],
     "model_version": "tier_kmeans_v1"
   },
