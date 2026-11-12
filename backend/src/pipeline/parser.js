@@ -24,7 +24,6 @@ export function isNumber(s) {
   const t = s.trim();
   if (t === '-' || t === '—' || t === '–') return true;
   if (!NUM_RE.test(t)) return false;
-  // Jangan anggap tahun 4 digit (2024..2030) di header sebagai nilai pos jika berdiri sendiri di baris header
   return true;
 }
 
@@ -43,7 +42,7 @@ export function parseNumber(s, locale = 'id-dot') {
   if (s == null) return null;
   const raw = String(s).trim();
   if (raw === '-' || raw === '—' || raw === '–') return 0;
-  const neg = (raw.startsWith('(') && raw.endsWith(')')) || raw.startsWith('-');
+  const neg = raw.startsWith('(') || raw.endsWith(')') || raw.startsWith('-');
   let t = raw.replace(/[()\-]/g, '').trim();
   if (!t) return null;
   t = locale === 'id-dot' ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
@@ -71,21 +70,97 @@ export function toRows(items, tol = 2.5) {
   return rows;
 }
 
+function isIncompleteNumberToken(str) {
+  const s = str.replace(/^\(/, '');
+  if (!s || s.endsWith(')')) return false;
+  if (s.endsWith('.') || s.endsWith(',')) return true;
+  const parts = s.split(/[.,]/);
+  if (parts.length >= 2 && parts.at(-1).length < 3) return true;
+  return false;
+}
+
+function mergeRowFragments(cells) {
+  if (!cells || cells.length <= 1) return cells;
+  const out = [];
+  for (const c of cells) {
+    const prev = out.at(-1);
+    if (!prev) {
+      out.push({ ...c });
+      continue;
+    }
+
+    const dx = c.x - prev.x;
+    const prevEnd = prev.x + (prev.w || prev.str.length * 4.2);
+    const gap = c.x - prevEnd;
+    const inNumZone = prev.x >= 195 && c.x < 405;
+
+    // Gabungkan pecahan angka atau tanda kurung negatif di zona kolom nilai/prior
+    if (
+      inNumZone &&
+      dx < 62 &&
+      !prev.str.endsWith(')') &&
+      /^[()\-.,\d]+$/.test(prev.str) &&
+      /^[()\-.,\d]+$/.test(c.str) &&
+      !c.str.startsWith('(')
+    ) {
+      const openParen = prev.str === '(' || (prev.str.startsWith('(') && !prev.str.endsWith(')'));
+      const closeParen = c.str === ')';
+      const sepEdge =
+        prev.str.endsWith('.') ||
+        prev.str.endsWith(',') ||
+        c.str.startsWith('.') ||
+        c.str.startsWith(',');
+      const incomplete = isIncompleteNumberToken(prev.str);
+
+      if ((openParen && gap <= 22) || (closeParen && gap <= 24) || (gap <= 14 && (sepEdge || incomplete || gap < 6))) {
+        prev.str = `${prev.str}${c.str}`;
+        prev.w = c.x - prev.x + (c.w || c.str.length * 4.2);
+        continue;
+      }
+    }
+
+    // Gabungkan kata label yang terpotong di tengah kata (mis. "b" + "ruto" -> "bruto", "202" + "6" -> "2026")
+    if (!inNumZone && gap < 3.5) {
+      if (
+        (/^[A-Za-z]$/.test(prev.str) && /^[a-z]{2,}/.test(c.str)) ||
+        (/^\d{3}$/.test(prev.str) && /^\d$/.test(c.str))
+      ) {
+        prev.str = `${prev.str}${c.str}`;
+        prev.w = c.x - prev.x + (c.w || c.str.length * 4.5);
+        continue;
+      }
+    }
+
+    out.push({ ...c });
+  }
+  return out;
+}
+
 export function detectMetadata(pages) {
   const allItems = pages.flatMap((p) => p.items || []);
-  const fullText = allItems.map((i) => i.str).join(' ');
+  const stmtText = allItems.map((i) => i.str).join(' ');
+  const fullText = `${pages._generalText || ''} ${stmtText}`;
   const locale = detectLocale(allItems);
 
   let unit = 'IDR';
-  if (/(dalam|in)\s+(jutaan|million\s*s?)/i.test(fullText)) unit = 'juta IDR';
-  else if (/(dalam|in)\s+(ribuan|thousand\s*s?)/i.test(fullText)) unit = 'ribu IDR';
+  if (
+    /(dalam|in)\s+(jutaan|million\s*s?)/i.test(fullText) ||
+    /pembulatan[^]{0,120}(jutaan|in\s+million)/i.test(fullText)
+  ) {
+    unit = 'juta IDR';
+  } else if (
+    /(dalam|in)\s+(ribuan|thousand\s*s?)/i.test(fullText) ||
+    /pembulatan[^]{0,120}(ribuan|in\s+thousand)/i.test(fullText)
+  ) {
+    unit = 'ribu IDR';
+  }
 
-  // Cari tanggal periode dari teks judul (mis. "31 MARET 2026" atau "MARCH 31, 2026")
   const dates = [];
   const idDateRe = /(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+(\d{4})/gi;
   const enDateRe = /(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),?\s+(\d{4})/gi;
+  const enDayFirstRe = /(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})/gi;
 
-  for (const m of fullText.matchAll(idDateRe)) {
+  for (const m of stmtText.matchAll(idDateRe)) {
     const day = String(m[1]).padStart(2, '0');
     const mon = MONTHS[m[2].toLowerCase()];
     const year = Number(m[3]);
@@ -93,9 +168,17 @@ export function detectMetadata(pages) {
       dates.push({ iso: `${year}-${String(mon).padStart(2, '0')}-${day}`, year, mon });
     }
   }
-  for (const m of fullText.matchAll(enDateRe)) {
+  for (const m of stmtText.matchAll(enDateRe)) {
     const mon = MONTHS[m[1].toLowerCase()];
     const day = String(m[2]).padStart(2, '0');
+    const year = Number(m[3]);
+    if (mon && year >= 2000 && year <= 2100) {
+      dates.push({ iso: `${year}-${String(mon).padStart(2, '0')}-${day}`, year, mon });
+    }
+  }
+  for (const m of stmtText.matchAll(enDayFirstRe)) {
+    const day = String(m[1]).padStart(2, '0');
+    const mon = MONTHS[m[2].toLowerCase()];
     const year = Number(m[3]);
     if (mon && year >= 2000 && year <= 2100) {
       dates.push({ iso: `${year}-${String(mon).padStart(2, '0')}-${day}`, year, mon });
@@ -114,10 +197,9 @@ export function detectMetadata(pages) {
   return { unit, locale, period_end, period_type, source };
 }
 
-function detectColumns(rows, locale) {
-  // Cari posisi x kolom Catatan/Notes
+function detectColumns(rows) {
   let noteX = null;
-  for (const r of rows.slice(0, 20)) {
+  for (const r of rows.slice(0, 25)) {
     for (const c of r.cells) {
       if (/^(catatan|notes)\b/i.test(c.str)) {
         noteX = c.x;
@@ -127,13 +209,14 @@ function detectColumns(rows, locale) {
     if (noteX != null) break;
   }
 
-  // Kumpulkan posisi x angka-angka berformat ribuan (pasti berada di kolom nilai/prior)
+  // Kumpulkan pasangan posisi x angka berformat ribuan di area nilai (x antara 195 dan 400)
   const numXs = [];
   for (const r of rows) {
-    if (r.y < 70) continue; // abaikan footer halaman
+    if (r.y < 65) continue;
     const bigNums = r.cells.filter((c) => {
-      if (noteX != null && c.x < noteX + 20) return false;
-      return /^\(?-?\d{1,3}(?:[.,]\d{3})+\)?$/.test(c.str);
+      if (c.x < 195 || c.x > 400) return false;
+      if (noteX != null && Math.abs(c.x - noteX) <= 18 && NOTE_RE.test(c.str)) return false;
+      return /^\(?-?\d{1,3}(?:[.,]\d{3})+(?:[.,]\d+)?\)?$/.test(c.str);
     });
     if (bigNums.length >= 2) {
       numXs.push([bigNums[0].x, bigNums[1].x]);
@@ -144,55 +227,84 @@ function detectColumns(rows, locale) {
     const col1 = numXs.map((p) => p[0]).sort((a, b) => a - b)[Math.floor(numXs.length / 2)];
     const col2 = numXs.map((p) => p[1]).sort((a, b) => a - b)[Math.floor(numXs.length / 2)];
     const effNoteX = noteX ?? col1 - 65;
-    const rightLabelX = col2 + 35;
-    return { noteX: effNoteX, col1X: col1, col2X: col2, rightLabelX };
+    const leftCutX = Math.min(col1, effNoteX) - 12;
+    const rightLabelX = Math.max(col2 + 35, 392);
+    return { noteX: effNoteX, hasExplicitNote: noteX != null, col1X: col1, col2X: col2, leftCutX, rightLabelX };
   }
 
-  // Fallback untuk fixture sederhana (mis. smgr_textcontent_p5.json)
-  return { noteX: 235, col1X: 315, col2X: 385, rightLabelX: 560 };
+  return { noteX: 235, hasExplicitNote: false, col1X: 315, col2X: 385, leftCutX: 225, rightLabelX: 560 };
 }
 
-function isFooterOrHeaderRow(rowText, y) {
-  if (y < 65 || y > 622) return true;
+function isHeaderOrFooterRow(rowText, y, numCells) {
+  if (y < 62) return true;
   if (/lihat\s+catatan\s+atas\s+laporan|see\s+the\s+accompanying\s+notes/i.test(rowText)) return true;
   if (/bagian\s+yang\s+tidak\s+terpisahkan|an\s+integral\s+part\s+of/i.test(rowText)) return true;
+  if (/pengungkapan\s+tambahan\s+informasi\s+arus\s+kas|supplemental\s+cash\s+flow\s+information/i.test(rowText)) return true;
   if (/^\s*-\s*\d+\s*-\s*$/.test(rowText)) return true;
+
+  // Baris judul/header tabel di bagian atas halaman (tanpa angka laporan, atau hanya angka tahun 2024..2030)
+  const onlyYearNumbers =
+    numCells.length === 0 || numCells.every((c) => /^202\d$/.test(c.str.trim()));
+
+  if (onlyYearNumbers && y > 615) {
+    if (
+      /the\s+original\s+consolidated|are\s+in\s+indonesian|pt\s+[a-z0-9\s]+tbk|dan\s+entitas\s+anak|and\s+its\s+subsidiaries|laporan\s+posisi\s+keuangan|consolidated\s+statement|laporan\s+laba\s+rugi|statement\s+of\s+profit|laporan\s+arus\s+kas|statement\s+of\s+cash|untuk\s+periode|for\s+the\s+three|periode\s+tiga\s+bulan|three\s+months\s+period|tanggal\s+31|as\s+of\s+march|disajikan\s+dalam|expressed\s+in|kecuali\s+dinyatakan|unless\s+otherwise|\[\d{7}\]|31\s+maret\s+202\d|31\s+march\s+202\d|31\s+desember\s+202\d|december\s+31,\s*202\d|march\s+31,\s*202\d|catatan\/|notes\b/i.test(
+        rowText
+      )
+    ) {
+      return true;
+    }
+  }
   return false;
 }
 
-export function parsePageRows(items, { page = 1, statement = 'posisi_keuangan', locale = 'id-dot', isFixture = false } = {}) {
+export function parsePageRows(
+  items,
+  { page = 1, statement = 'posisi_keuangan', locale = 'id-dot', source = 'company_pdf', isFixture = false } = {}
+) {
   const rawRows = toRows(items);
-  const cols = detectColumns(rawRows, locale);
+  const mergedRows = isFixture
+    ? rawRows
+    : rawRows.map((r) => ({ y: r.y, cells: mergeRowFragments(r.cells) }));
 
-  // Deteksi apakah seluruh halaman punya kolom angka di sekitar 300-400 dan bahasa Inggris di kanan (>400)
-  const hasBilingualRight = rawRows.some((r) =>
-    r.cells.some((c) => c.x >= 400 && /[A-Za-z]{4,}/.test(c.str) && !isNumber(c.str))
+  const cols = detectColumns(mergedRows);
+  const hasBilingualRight = mergedRows.some((r) =>
+    r.cells.some((c) => c.x >= 395 && /[A-Za-z]{4,}/.test(c.str) && !isNumber(c.str))
   );
   const rightCutX = hasBilingualRight ? cols.rightLabelX : 9999;
+  const noteBetweenCols = cols.hasExplicitNote && cols.col1X < cols.noteX && cols.noteX < cols.col2X;
+  const noteLeftOfCols = cols.hasExplicitNote && cols.noteX < cols.col1X - 25;
+  const numStartX = noteLeftOfCols ? cols.col1X - 30 : 198;
+  const labelEndX = noteLeftOfCols ? cols.noteX - 8 : 198;
 
   const parsedLines = [];
 
-  for (const r of rawRows) {
+  for (const r of mergedRows) {
     const joined = r.cells.map((c) => c.str).join(' ');
-    if (!isFixture && isFooterOrHeaderRow(joined, r.y)) continue;
 
     const leftCells = [];
     const rightLabelCells = [];
     const numCells = [];
 
     for (const c of r.cells) {
-      // Abaikan kolom catatan (mis. "5,32", "15a,32", "20")
-      if (c.x >= cols.noteX - 10 && c.x < cols.col1X - 18 && NOTE_RE.test(c.str)) {
+      // Abaikan kolom catatan
+      if (noteBetweenCols && Math.abs(c.x - cols.noteX) <= 22) {
         continue;
       }
-      if (c.x >= cols.col1X - 18 && c.x < rightCutX && isNumber(c.str)) {
+      if (noteLeftOfCols && c.x >= cols.noteX - 8 && c.x < numStartX && NOTE_RE.test(c.str)) {
+        continue;
+      }
+
+      if (c.x >= numStartX && c.x < rightCutX && isNumber(c.str)) {
         numCells.push(c);
-      } else if (c.x < cols.noteX - 5) {
+      } else if (c.x < labelEndX) {
         leftCells.push(c);
       } else if (c.x >= rightCutX && !isNumber(c.str)) {
         rightLabelCells.push(c);
       }
     }
+
+    if (!isFixture && isHeaderOrFooterRow(joined, r.y, numCells)) continue;
 
     const labelId = leftCells.map((c) => c.str).join(' ').replace(/\s+/g, ' ').trim();
     const labelEn = rightLabelCells.map((c) => c.str).join(' ').replace(/\s+/g, ' ').trim();
@@ -221,7 +333,51 @@ export function parsePageRows(items, { page = 1, statement = 'posisi_keuangan', 
     });
   }
 
-  // Gabungkan label multibaris & konteks seksi (mis. "DIATRIBUSIKAN KEPADA:" -> "Pemilik entitas induk")
+  // Mode BEI XBRL PDF: angka berada di baris PERTAMA pos, dan baris lanjutan di bawahnya diawali huruf kecil / tanda kurung
+  if (source === 'bei_pdf' && !isFixture) {
+    const out = [];
+    for (let i = 0; i < parsedLines.length; i++) {
+      const cur = parsedLines[i];
+      if (!cur.hasNumbers) continue;
+
+      const labelParts = [cur.label].filter(Boolean);
+      const labelEnParts = [cur.label_en].filter(Boolean);
+      let lastY = cur.y;
+
+      while (i + 1 < parsedLines.length) {
+        const next = parsedLines[i + 1];
+        if (next.hasNumbers) break;
+        if (lastY - next.y > 16) break;
+        const nextId = next.label || '';
+        const nextEn = next.label_en || '';
+        const isContinuation =
+          /^[a-z(]/.test(nextId) || (!nextId && /^[a-z(]/.test(nextEn));
+        if (!isContinuation) break;
+
+        if (nextId) labelParts.push(nextId);
+        if (nextEn) labelEnParts.push(nextEn);
+        lastY = next.y;
+        i++;
+      }
+
+      const fullLabel = labelParts.join(' ').replace(/\s+/g, ' ').trim();
+      const fullLabelEn = labelEnParts.join(' ').replace(/\s+/g, ' ').trim();
+      if (!fullLabel) continue;
+
+      const rowObj = {
+        label: fullLabel,
+        value: cur.value,
+        prior: cur.prior,
+        page,
+        statement,
+      };
+      if (fullLabelEn) rowObj.label_en = fullLabelEn;
+      out.push(rowObj);
+    }
+    return out;
+  }
+
+  // Mode Company PDF: angka berada di baris TERAKHIR dari label multibaris
   const out = [];
   let pendingParts = [];
   let pendingEnParts = [];
@@ -249,10 +405,20 @@ export function parsePageRows(items, { page = 1, statement = 'posisi_keuangan', 
     }
 
     if (!cur.hasNumbers) {
-      // Baris header seksi murni (huruf besar semua atau diakhiri titik dua) -> jangan digabung ke pos biasa kecuali kalimat menggantung
+      const joinedPending = [...pendingParts, clean].join(' ').trim();
+      const nextLine = parsedLines[i + 1];
+      const isEquityParentHeading =
+        /ekuitas\s+yang\s+dapat\s+diatribusikan\s+kepada\s+pemilik\s+entitas\s+induk/i.test(joinedPending) &&
+        nextLine &&
+        !nextLine.hasNumbers &&
+        /^modal\s+saham/i.test(nextLine.label);
+
       const isSectionHeading =
+        isEquityParentHeading ||
         clean.endsWith(':') ||
-        /^(ASET|ASET LANCAR|ASET TIDAK LANCAR|LIABILITAS JANGKA PENDEK|LIABILITAS JANGKA PANJANG|EKUITAS|ARUS KAS DARI AKTIVITAS|POS-POS YANG)/i.test(clean);
+        /^(ASET|ASET LANCAR|ASET TIDAK LANCAR|LIABILITAS DAN EKUITAS|LIABILITAS|LIABILITAS JANGKA PENDEK|LIABILITAS JANGKA PANJANG|EKUITAS|SALDO LABA|BEBAN USAHA|PENDAPATAN \(BEBAN\) USAHA LAINNYA|PENGHASILAN KOMPREHENSIF LAIN|LABA PER SAHAM|ARUS KAS DARI AKTIVITAS|POS-POS YANG)/i.test(
+          clean
+        );
 
       if (isSectionHeading) {
         pendingParts = [];
@@ -265,18 +431,33 @@ export function parsePageRows(items, { page = 1, statement = 'posisi_keuangan', 
       continue;
     }
 
-    // Baris memiliki angka
+    // Baris subtotal tanpa label tepat sebelum "Kepentingan nonpengendali" pada laporan posisi keuangan (mis. AKRA)
+    if (!clean && pendingParts.length === 0 && statement === 'posisi_keuangan') {
+      const nextLine = parsedLines[i + 1];
+      if (nextLine && /^kepentingan\s+non\s*-?\s*pengendali/i.test(nextLine.label)) {
+        out.push({
+          label: 'Jumlah ekuitas yang dapat diatribusikan kepada pemilik entitas induk',
+          label_en: 'Total equity attributable to owners of the parent entity',
+          value: cur.value,
+          prior: cur.prior,
+          page,
+          statement,
+        });
+      }
+      continue;
+    }
+
     let fullLabel = [...pendingParts, clean].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
     let fullLabelEn = [...pendingEnParts, cur.label_en].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
     pendingParts = [];
     pendingEnParts = [];
 
-    if (sectionContext && /^(pemilik\s+entitas\s+induk|kepentingan\s+non-pengendali)/i.test(fullLabel)) {
+    if (sectionContext && /^(pemilik\s+entitas\s+induk|kepentingan\s+non\s*-?\s*pengendali)/i.test(fullLabel)) {
       fullLabel = `${sectionContext} - ${fullLabel}`;
-      if (/^kepentingan\s+non-pengendali/i.test(clean)) {
-        sectionContext = ''; // selesai blok atribusi
+      if (/^kepentingan\s+non\s*-?\s*pengendali/i.test(clean)) {
+        sectionContext = '';
       }
-    } else if (!/^(pemilik\s+entitas\s+induk|kepentingan\s+non-pengendali)/i.test(clean)) {
+    } else if (!/^(pemilik\s+entitas\s+induk|kepentingan\s+non\s*-?\s*pengendali)/i.test(clean)) {
       sectionContext = '';
     }
 
@@ -305,6 +486,7 @@ export async function parse(pages) {
       page: p.page,
       statement: p.statement,
       locale: meta.locale,
+      source: meta.source,
     });
     allRows.push(...rows);
   }

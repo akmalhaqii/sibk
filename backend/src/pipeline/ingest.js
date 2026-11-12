@@ -59,6 +59,7 @@ export async function ingest(file) {
   const data = new Uint8Array(await fs.readFile(file.path));
   const doc = await getDocument({ data, useSystemFonts: true }).promise;
   const pages = [];
+  const generalTexts = [];
   let lastTaxonomyStatement = null;
 
   for (let n = 1; n <= doc.numPages; n++) {
@@ -66,16 +67,30 @@ export async function ingest(file) {
     const { items } = await page.getTextContent();
     const text = items.map((i) => i.str).join(' ');
     const hasText = text.trim().length > 50;
+    if (n <= 5) {
+      generalTexts.push(text);
+    }
 
-    // Untuk paket BEI, halaman lanjutan mungkin mewarisi kode taksonomi sampai kode [1xxxxxx] baru muncul
-    const topText = items.slice(0, 20).map((i) => i.str).join(' ');
-    const anyTax = topText.match(/\[(\d{7})\]/);
+    const sortedTop = items
+      .filter((i) => i.str && i.str.trim())
+      .slice()
+      .sort((a, b) => (b.transform?.[5] ?? 0) - (a.transform?.[5] ?? 0) || (a.transform?.[4] ?? 0) - (b.transform?.[4] ?? 0))
+      .slice(0, 30)
+      .map((i) => i.str)
+      .join(' ');
+
+    const anyTax = sortedTop.match(/\[(\d{7})\]/);
     if (anyTax) {
       lastTaxonomyStatement = TAXONOMY[anyTax[1]] ?? null;
     }
 
-    const statement = classify(items) ?? (lastTaxonomyStatement && items.some((i) => NUM_RE.test(i.str.trim())) ? lastTaxonomyStatement : null);
+    const statement =
+      classify(items) ??
+      (lastTaxonomyStatement && items.some((i) => NUM_RE.test(i.str.trim())) ? lastTaxonomyStatement : null);
     pages.push({ page: n, items, hasText, statement });
   }
-  return pages.filter((p) => p.statement);
+
+  const corePages = pages.filter((p) => p.statement);
+  corePages._generalText = generalTexts.join(' ');
+  return corePages;
 }

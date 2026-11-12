@@ -41,22 +41,71 @@ export function normalizeLabel(s) {
     .trim();
 }
 
-function scoreCandidate(row, synNorm, isTotalField) {
+function isForbiddenCandidate(field, cand) {
+  if (field === 'total_assets' || field === 'total_liabilities' || field === 'total_equity') {
+    if (/(dan ekuitas|and equity|lancar|current|jangka|induk|parent|lainnya|other)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'cash') {
+    if (/(awal periode|akhir periode|beginning|end of period|arus kas|cash flows|dibatasi|restricted)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'inventories') {
+    if (/(tanah kawasan|industrial estate|tidak lancar|non current|hewan|livestock|real estat|uang muka|penjualan)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'fixed_assets') {
+    if (/(uang muka|advances|penjualan|pelepasan|disposal|pembelian|perolehan|acquisition|pemeliharaan)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'revenue') {
+    if (/(beban pokok|cost of|komprehensif|comprehensive|ditangguhkan|unearned|keuangan|finance|lainnya|other|sewa|rental|dividen|bunga)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'operating_profit') {
+    if (/(lainnya|other|sebelum|before)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'net_income' || field === 'net_income_parent') {
+    if (/(komprehensif|comprehensive|per saham|per share|sebelum pajak|before tax|operasi yang dilanjutkan|continuing|dihentikan|discontinued)/.test(cand)) {
+      return true;
+    }
+  }
+  if (field === 'capex') {
+    if (/(uang muka|advances|hasil penjualan|penerimaan|proceeds)/.test(cand)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function scoreCandidate(row, synNorm, field) {
+  const isTotalField = field.startsWith('total_');
   const candidates = [normalizeLabel(row.label), normalizeLabel(row.label_en)].filter(Boolean);
+
   for (const cand of candidates) {
+    if (isForbiddenCandidate(field, cand)) continue;
     if (cand === synNorm) return 1.0;
   }
+
   for (const cand of candidates) {
-    if (isTotalField && cand !== synNorm) {
-      if (synNorm === 'jumlah liabilitas' || synNorm === 'total liabilities') continue;
-      if (synNorm === 'jumlah aset' || synNorm === 'total assets') continue;
-      if (synNorm === 'jumlah ekuitas' || synNorm === 'total equity') continue;
-    }
+    if (isForbiddenCandidate(field, cand)) continue;
+    if (isTotalField) continue;
+    if (synNorm.length < 6) continue;
     if (cand.includes(synNorm) || (cand.length >= 10 && synNorm.includes(cand))) {
       return 0.8;
     }
   }
+
   for (const cand of candidates) {
+    if (isForbiddenCandidate(field, cand)) continue;
+    if (isTotalField) continue;
     const maxLen = Math.max(cand.length, synNorm.length);
     if (maxLen < 6) continue;
     const sim = 1 - distance(cand, synNorm) / maxLen;
@@ -71,7 +120,7 @@ function extractShareCountFromLabel(rows) {
     const text = r.label || '';
     if (!/modal\s+ditempatkan\s+dan\s+disetor/i.test(text)) continue;
     const sub = text.split(/modal\s+ditempatkan\s+dan\s+disetor(?:\s+penuh)?/i)[1] || text;
-    const matches = [...sub.matchAll(/(\d{1,3}(?:[.,]\d{3})+|\d+)\s*lembar\s+saham/gi)];
+    const matches = [...sub.matchAll(/(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:lembar\s+)?saham\b/gi)];
     if (matches.length > 0) {
       let totalShares = 0;
       for (const m of matches) {
@@ -100,7 +149,7 @@ export function mapFields(rows = [], { ticker = 'UNKNOWN' } = {}) {
 
   for (const [field, synonyms] of Object.entries(labels)) {
     const targetStmt = FIELD_STATEMENT[field];
-    const isTotalField = field.startsWith('total_');
+    const isTotalField = field.startsWith('total_') || field === 'revenue';
     const synNorms = synonyms.map(normalizeLabel);
 
     let best = null;
@@ -111,7 +160,7 @@ export function mapFields(rows = [], { ticker = 'UNKNOWN' } = {}) {
 
       let rowBestScore = 0;
       for (const sn of synNorms) {
-        const sc = scoreCandidate(r, sn, isTotalField);
+        const sc = scoreCandidate(r, sn, field);
         if (sc > rowBestScore) rowBestScore = sc;
       }
       if (rowBestScore <= 0) continue;
