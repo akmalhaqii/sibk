@@ -6,7 +6,7 @@ import { fmtPct, fmtMultiple } from '../format.js';
 import { buildCatalog } from '../narrator/binding.js';
 import { checkQualitativeSentence } from '../narrator/qualitative.js';
 
-const CHAT_FORBIDDEN_RE =
+export const CHAT_FORBIDDEN_RE =
   /\b(beli|membeli|dibeli|jual|menjual|dijual|tahan|hold|buy|sell|layak|worth it|target harga|price target|potensi naik|cuan|entry|cut ?loss|average down|averaging|rekomendasi|rekomendasikan|sebaiknya (?:saya )?(?:beli|jual|masuk|keluar)|masuk (?:di|ke) harga|investasi(?:kan)? di|undervalued|overvalued|(?:murah|mahal)\s+untuk\s+dibeli)\b/i;
 
 const PCT_KEYS = new Set([

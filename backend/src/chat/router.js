@@ -18,8 +18,12 @@ export function classifyQuestion(question, { ticker = null } = {}) {
   if (ADVICE_RE.test(q)) return { intent: 'advice', terms };
   if (GREETING_RE.test(q)) return { intent: 'greeting', terms };
   if (terms.length && DEFINITION_RE.test(q)) return { intent: 'glossary', terms };
-  // Pertanyaan sangat pendek yang hanya menyebut istilah ("DER?", "nilai wajar graham")
-  if (terms.length && q.replace(/[?!.]/g, '').trim().split(/\s+/).length <= 3) return { intent: 'glossary', terms };
+  // Pertanyaan sangat pendek yang hanya menyebut istilah ("DER?", "nilai wajar graham"),
+  // kecuali bila menanyakan alasan/nilai milik emiten ("Kenapa tier-nya mid?", "Berapa ROE?")
+  const asksIssuerData = /\b(kenapa|mengapa|berapa|bagaimana|apakah)\b|-nya\b/i.test(q);
+  if (terms.length && !asksIssuerData && q.replace(/[?!.]/g, '').trim().split(/\s+/).length <= 3) {
+    return { intent: 'glossary', terms };
+  }
   const mentionsTicker = ticker && new RegExp(`\\b${ticker}\\b`, 'i').test(q);
   if (!terms.length && !mentionsTicker && !FINANCE_RE.test(q)) return { intent: 'out_of_scope', terms };
   return { intent: 'analysis', terms };
