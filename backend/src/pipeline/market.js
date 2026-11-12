@@ -7,8 +7,19 @@ try {
 
 let cooldownUntil = 0;
 
+// Tahap 5: PRICE_PROVIDER=off mematikan pengambilan harga online (tes offline, demo tanpa internet).
+// Harga manual dari UI tetap berfungsi karena tidak melewati fungsi ini.
+export function priceProvider() {
+  return (process.env.PRICE_PROVIDER || 'yahoo').toLowerCase();
+}
+
 export async function fetchPrice(ticker) {
   if (!ticker) throw new Error('ticker kosong');
+  if (priceProvider() === 'off') {
+    const err = new Error('harga online dimatikan (PRICE_PROVIDER=off); isi harga manual');
+    err.status = 503;
+    throw err;
+  }
   if (Date.now() < cooldownUntil) {
     throw new Error('harga pasar sedang tidak tersedia (cooldown)');
   }

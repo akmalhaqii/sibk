@@ -6,6 +6,7 @@ import recompute from './routes/recompute.js';
 import narrative from './routes/narrative.js';
 import price from './routes/price.js';
 import health from './routes/health.js';
+import report from './routes/report.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -18,6 +19,7 @@ app.use('/api/recompute', recompute);
 app.use('/api/narrative', narrative);
 app.use('/api/price', price);
 app.use('/api/health', health);
+app.use('/api/report', report); // FR-OUT-01
 
 app.use(errorHandler);
 export default app;

@@ -6,7 +6,7 @@ const STATUS_LABELS = {
   lemah: 'Lemah',
 };
 
-export default function MetricCard({ label, metric, annualized = false }) {
+export default function MetricCard({ label, metric, annualized = false, hint = null }) {
   const display = metric?.display ?? '—';
   const status = metric?.status ?? null;
   const formula = metric?.formula ?? '';
@@ -30,6 +30,8 @@ export default function MetricCard({ label, metric, annualized = false }) {
       </div>
 
       <div className="metric-value">{display}</div>
+
+      {hint && <p className="metric-hint">{hint}</p>}
 
       <div className="metric-footer">
         {annualized && <span className="metric-note">disetahunkan</span>}

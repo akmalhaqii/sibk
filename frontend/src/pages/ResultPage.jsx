@@ -9,6 +9,7 @@ import TierCard from '../components/TierCard.jsx';
 import ValuationCard from '../components/ValuationCard.jsx';
 import ExtractionTable from '../components/ExtractionTable.jsx';
 import NarrativePanel from '../components/NarrativePanel.jsx';
+import ReportActions from '../components/ReportActions.jsx';
 import mockResult from '../mock/analyze.json';
 
 const STORAGE_KEY = 'telusurfin:last_result';
@@ -32,7 +33,12 @@ const METRIC_GROUPS = [
   {
     title: 'Solvabilitas',
     items: [
-      { key: 'der', label: 'DER', annualizedQuarterly: false },
+      {
+        key: 'der',
+        label: 'Liabilitas/ekuitas',
+        annualizedQuarterly: false,
+        hint: 'Total liabilitas dibagi ekuitas. Bukan DER utang berbunga seperti di situs data saham, jadi nilainya bisa lebih tinggi.',
+      },
       { key: 'liability_to_asset', label: 'Liabilitas/aset', annualizedQuarterly: false },
     ],
   },
@@ -81,6 +87,7 @@ export default function ResultPage() {
     return null;
   });
 
+  const [narrativeData, setNarrativeData] = useState(null); // FR-OUT-01
   const [recomputing, setRecomputing] = useState(false);
   const [recomputeError, setRecomputeError] = useState(null);
 
@@ -184,7 +191,7 @@ export default function ResultPage() {
       <header className="result-header card">
         <div className="result-title-group">
           <div className="result-topline">
-            <Link to="/" className="back-link">
+            <Link to="/" className="back-link no-print">
               ← Unggah Laporan Baru
             </Link>
             {entity?.file_url && (
@@ -192,7 +199,7 @@ export default function ResultPage() {
                 href={entity.file_url}
                 target="_blank"
                 rel="noreferrer"
-                className="pdf-source-link"
+                className="pdf-source-link no-print"
               >
                 Buka PDF Sumber ↗
               </a>
@@ -217,7 +224,7 @@ export default function ResultPage() {
       )}
 
       {/* Ringkasan Narasi */}
-      <NarrativePanel result={result} />
+      <NarrativePanel result={result} onLoaded={setNarrativeData} />
 
       {/* Grid Dua Kolom: Metrik (Kiri) & Tier + Valuasi (Kanan) */}
       <div className="dashboard-grid">
@@ -240,6 +247,7 @@ export default function ResultPage() {
                       label={item.label}
                       metric={metrics?.[item.key]}
                       annualized={item.annualizedQuarterly && isQuarterly}
+                      hint={item.hint}
                     />
                   ))}
                 </div>
@@ -254,11 +262,15 @@ export default function ResultPage() {
             valuation={valuation}
             market={market}
             isQuarterly={isQuarterly}
+            periodType={entity?.period_type}
             onApplyPrice={handleApplyPrice}
             loading={recomputing}
           />
         </div>
       </div>
+
+      {/* FR-OUT-01: unduh laporan akhir */}
+      <ReportActions result={result} narrative={narrativeData} />
 
       {/* Tabel Ekstraksi & Koreksi */}
       <ExtractionTable

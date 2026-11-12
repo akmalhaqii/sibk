@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "catatan": "Kamus istilah untuk chatbot Tanya TelusurFin (FR-CHAT-03). Dimulai dari butir A-3: menjelaskan kenapa angka TelusurFin bisa berbeda dari situs data saham.",
+  "entries": [
+    {
+      "term": "Nilai wajar Graham",
+      "aliases": ["graham number", "nilai wajar", "fair value graham", "graham"],
+      "metric_key": "fair_value",
+      "definisi": "Estimasi nilai wajar konservatif per saham dari laporan keuangan, dikembangkan Benjamin Graham untuk investor defensif.",
+      "rumus": "√(22,5 × EPS × BVPS)",
+      "catatan_proyek": "Pada laporan kuartalan, EPS disetahunkan (laba kuartal × 4). Graham Number cenderung rendah untuk emiten dengan ROE tinggi. Angka ini bukan target harga analis; situs lain bisa memakai DCF, konsensus analis, atau laba 12 bulan terakhir sehingga hasilnya berbeda."
+    },
+    {
+      "term": "Target harga analis",
+      "aliases": ["target harga", "target price", "konsensus analis", "price target"],
+      "metric_key": null,
+      "definisi": "Perkiraan harga saham 12 bulan ke depan dari analis sekuritas, biasanya dirata-ratakan menjadi konsensus.",
+      "rumus": null,
+      "catatan_proyek": "Berbasis proyeksi dan ekspektasi pasar, bukan hanya laporan keuangan. TelusurFin tidak menghitung atau mengambil target harga analis karena sistem bekerja offline dan tidak memberi saran investasi."
+    },
+    {
+      "term": "Liabilitas terhadap ekuitas",
+      "aliases": ["der", "debt to equity", "rasio utang terhadap ekuitas", "liabilitas/ekuitas"],
+      "metric_key": "der",
+      "definisi": "Perbandingan seluruh kewajiban perusahaan terhadap ekuitasnya; makin rendah makin longgar struktur permodalannya.",
+      "rumus": "(total liabilitas + dana syirkah temporer) ÷ total ekuitas",
+      "catatan_proyek": "TelusurFin memakai total liabilitas, termasuk utang usaha dan uang muka pelanggan. Situs data saham sering menyebut 'DER' untuk utang berbunga saja (pinjaman bank, obligasi), sehingga angkanya lebih kecil. Contoh AKRA Q1 2026: 1,29x (total liabilitas) dibanding sekitar 0,38x (utang berbunga) di situs lain."
+    },
+    {
+      "term": "Disetahunkan",
+      "aliases": ["annualisasi", "annualized", "disetahunkan"],
+      "metric_key": null,
+      "definisi": "Mengubah angka satu periode menjadi setara satu tahun agar bisa dibandingkan dengan ambang tahunan.",
+      "rumus": "angka kuartal Q1 × 4",
+      "catatan_proyek": "Dipakai untuk ROE, ROA, arus kas operasi terhadap aset, EPS, PER, dan P/S pada laporan kuartalan. Bila bisnis musiman, hasilnya bisa berbeda dari laba 12 bulan terakhir (TTM) yang dipakai situs data saham."
+    },
+    {
+      "term": "Laba 12 bulan terakhir (TTM)",
+      "aliases": ["ttm", "trailing twelve months", "laba 12 bulan terakhir"],
+      "metric_key": null,
+      "definisi": "Jumlah laba empat kuartal terakhir yang benar-benar terjadi.",
+      "rumus": "laba tahun lalu + laba kuartal berjalan − laba kuartal yang sama tahun lalu",
+      "catatan_proyek": "Belum dihitung TelusurFin karena butuh laporan tahunan sebelumnya. Inilah salah satu penyebab PER dan ROE TelusurFin berbeda dari situs lain."
+    },
+    {
+      "term": "Saham treasuri",
+      "aliases": ["treasury stock", "saham yang diperoleh kembali", "buyback", "treasuri"],
+      "metric_key": null,
+      "definisi": "Saham emiten yang dibeli kembali oleh emiten itu sendiri dan tidak beredar di publik.",
+      "rumus": null,
+      "catatan_proyek": "Jumlah saham TelusurFin diambil dari modal ditempatkan dan disetor dan belum dikurangi saham treasuri, sehingga EPS dan BVPS sedikit lebih rendah dari seharusnya."
+    },
+    {
+      "term": "PER",
+      "aliases": ["price to earnings", "p/e", "per"],
+      "metric_key": "per",
+      "definisi": "Harga saham dibagi laba per saham; menunjukkan berapa kali laba setahun dibayar investor.",
+      "rumus": "harga ÷ EPS",
+      "catatan_proyek": "Hasilnya bergantung pada harga yang dipakai (input manual atau Yahoo Finance) dan EPS yang disetahunkan."
+    },
+    {
+      "term": "PBV",
+      "aliases": ["price to book", "p/b", "pbv"],
+      "metric_key": "pbv",
+      "definisi": "Harga saham dibagi nilai buku per saham.",
+      "rumus": "harga ÷ BVPS",
+      "catatan_proyek": "BVPS memakai ekuitas yang dapat diatribusikan kepada pemilik entitas induk."
+    }
+  ]
+}

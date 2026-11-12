@@ -1,8 +1,30 @@
 // Semua path relatif terhadap folder backend/.
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseEnv } from 'node:util';
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+// Isi backend/.env MENANG atas variabel environment Windows/PowerShell yang sudah ada.
+// Alasan: `node --env-file` tidak menimpa variabel yang sudah ter-set, sehingga PROMPT_VERSION lama
+// di environment Windows diam-diam mengalahkan .env (ditemukan saat eval 13 Nov 2026).
+// Dilewati saat tes (TELUSURFIN_TEST=1, diset tests/setup.js) agar tes tetap deterministik.
+const envPath = path.join(backendRoot, '.env');
+if (process.env.TELUSURFIN_TEST !== '1' && fs.existsSync(envPath)) {
+  try {
+    const fromFile = parseEnv(fs.readFileSync(envPath, 'utf8'));
+    const overridden = Object.keys(fromFile).filter(
+      (k) => process.env[k] !== undefined && process.env[k] !== fromFile[k]
+    );
+    Object.assign(process.env, fromFile);
+    if (overridden.length) {
+      console.warn(`[env] nilai dari backend/.env dipakai menggantikan variabel environment: ${overridden.join(', ')}`);
+    }
+  } catch (e) {
+    console.warn(`[env] gagal membaca backend/.env: ${e.message}`);
+  }
+}
 const r = (p, d) => path.resolve(backendRoot, p || d);
 
 export default {
@@ -18,6 +40,7 @@ export default {
     model: process.env.OLLAMA_MODEL || 'qwen3:4b',
     fallbackModel: process.env.OLLAMA_FALLBACK_MODEL || 'qwen3:1.7b',
     timeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS || 60000),
+    numPredict: Number(process.env.OLLAMA_NUM_PREDICT || 400), // REV-06
   },
-  promptVersion: process.env.PROMPT_VERSION || 'narrative_v2',
+  promptVersion: process.env.PROMPT_VERSION || 'narrative_v6',
 };

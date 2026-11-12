@@ -41,12 +41,15 @@ export async function recompute(payload) {
   return checkOk(res);
 }
 
-export async function narrative(payload) {
+// REV-06: mode 'template' = ringkasan otomatis seketika; mode 'llm' = coba Qwen (bisa ±30 detik)
+export async function narrative(payload, { mode = 'llm', signal } = {}) {
   if (USE_MOCK) {
-    await delay(300);
+    await delay(mode === 'template' ? 50 : 300);
     return structuredClone(mockNarrative);
   }
-  const res = await fetch(`${BASE}/narrative`, {
+  const qs = mode === 'template' ? '?mode=template' : '';
+  const res = await fetch(`${BASE}/narrative${qs}`, {
+    signal,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -56,3 +59,30 @@ export async function narrative(payload) {
 
 export const getPrice = (ticker) => fetch(`${BASE}/price/${ticker}`).then(checkOk);
 export const getHealth = () => fetch(`${BASE}/health`).then(checkOk);
+
+// FR-OUT-01: unduh laporan akhir (md | json) dari backend dan simpan sebagai berkas
+export async function downloadReport(result, narrativeData, format = 'md') {
+  if (USE_MOCK) throw new Error('Ekspor laporan membutuhkan backend (VITE_USE_MOCK=false).');
+  const res = await fetch(`${BASE}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ result, narrative: narrativeData ?? null, format }),
+  });
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try { msg = (await res.json()).error || msg; } catch {}
+    throw new Error(msg);
+  }
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || `TelusurFin_laporan.${format}`;
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return filename;
+}

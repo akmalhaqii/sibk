@@ -38,7 +38,10 @@ function ValuationItem({ label, item, annualized = false }) {
   );
 }
 
-export default function ValuationCard({ valuation, market, isQuarterly, onApplyPrice, loading = false }) {
+const SOURCE_LABEL = { manual: 'input manual', 'yahoo-finance2': 'Yahoo Finance' };
+const sourceLabel = (s) => SOURCE_LABEL[s] ?? s;
+
+export default function ValuationCard({ valuation, market, isQuarterly, periodType, onApplyPrice, loading = false }) {
   const [priceText, setPriceText] = useState(
     market?.price != null ? fmtNumber(market.price, 0) : ''
   );
@@ -71,7 +74,7 @@ export default function ValuationCard({ valuation, market, isQuarterly, onApplyP
     <section className="ValuationCard card">
       <div className="section-header">
         <h2>Valuasi &amp; Harga Pasar</h2>
-        {market?.source && <span className="meta-pill">Sumber: {market.source}</span>}
+        {market?.source && <span className="meta-pill">Sumber: {sourceLabel(market.source)}</span>}
       </div>
 
       <div className="market-price-box">
@@ -82,7 +85,7 @@ export default function ValuationCard({ valuation, market, isQuarterly, onApplyP
               <div className="market-price-value">{fmtRupiah(market.price)}</div>
             </div>
             <div className="market-meta">
-              <div>Sumber: <strong>{market.source}</strong></div>
+              <div>Sumber: <strong>{sourceLabel(market.source)}</strong></div>
               {market.fetched_at && (
                 <div>Waktu: {new Date(market.fetched_at).toLocaleString('id-ID')}</div>
               )}
@@ -125,12 +128,12 @@ export default function ValuationCard({ valuation, market, isQuarterly, onApplyP
 
       <div className="graham-box">
         <div className="graham-header">
-          <span>Nilai Wajar</span>
-          <span className="meta-pill">metode: Graham Number</span>
+          <span>Nilai Wajar Graham (konservatif)</span>
+          <span className="meta-pill">√(22,5 × EPS × BVPS)</span>
         </div>
         <div className="graham-grid">
           <div>
-            <small className="graham-sub">Estimasi Nilai Wajar</small>
+            <small className="graham-sub">Estimasi nilai wajar Graham</small>
             <div className="graham-val">
               {hasFv ? (
                 <strong>{fv.display}</strong>
@@ -140,7 +143,9 @@ export default function ValuationCard({ valuation, market, isQuarterly, onApplyP
             </div>
           </div>
           <div>
-            <small className="graham-sub">Premium / Diskon vs Harga</small>
+            <small className="graham-sub">
+              Harga {market?.price != null ? fmtRupiah(market.price) : ''} vs nilai wajar
+            </small>
             <div className="graham-val">
               {hasPd ? (
                 <strong className={pd.value <= 0 ? 'text-success' : 'text-warning'}>
@@ -152,6 +157,20 @@ export default function ValuationCard({ valuation, market, isQuarterly, onApplyP
             </div>
           </div>
         </div>
+      </div>
+
+      {/* A-1: jelaskan dasar perhitungan agar tidak disamakan dengan target harga analis */}
+      <div className="graham-explain">
+        <p>
+          Dihitung dari EPS {valuation?.eps?.display && valuation.eps.display !== '—' ? valuation.eps.display : '—'} dan BVPS{' '}
+          {valuation?.bvps?.display && valuation.bvps.display !== '—' ? valuation.bvps.display : '—'}
+          {isQuarterly ? `; EPS berasal dari laba ${periodType ?? 'kuartal'} yang disetahunkan (×4)` : ''}
+          {market?.price != null ? `, dibandingkan dengan harga ${fmtRupiah(market.price)} (${sourceLabel(market.source)})` : ''}.
+        </p>
+        <p>
+          Ini estimasi konservatif dari laporan keuangan, <strong>bukan target harga analis</strong>. Situs lain bisa memakai
+          model berbeda (misalnya DCF atau konsensus analis) dan laba 12 bulan terakhir, sehingga hasilnya bisa berbeda.
+        </p>
       </div>
 
       {shares && (

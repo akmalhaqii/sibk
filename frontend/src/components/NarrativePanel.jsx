@@ -23,23 +23,29 @@ function cleanPlainText(raw = '') {
     .join('\n\n');
 }
 
-export default function NarrativePanel({ result }) {
+export default function NarrativePanel({ result, onLoaded }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!result) return;
+    const controller = new AbortController();
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setData(null);
+    onLoaded?.(null);
 
-    narrative(result)
+    // Narasi v5: satu panggilan; selama menunggu hanya status "Qwen sedang menulis…" yang tampil
+    narrative(result, { signal: controller.signal })
       .then((res) => {
-        if (!cancelled) setData(res);
+        if (cancelled) return;
+        setData(res);
+        onLoaded?.(res); // FR-OUT-01: narasi ikut masuk laporan yang diunduh
       })
       .catch((err) => {
-        if (!cancelled) setError(err.message);
+        if (!cancelled && err.name !== 'AbortError') setError(err.message);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -47,35 +53,46 @@ export default function NarrativePanel({ result }) {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [result]);
+  }, [result]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const paragraphs = cleanPlainText(data?.text || '')
-    .split(/\n\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const text = cleanPlainText(data?.text || '');
+  const paragraphs = text.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+  const isLlm = data?.source === 'llm';
+
+  let note = null;
+  if (data && !isLlm) {
+    if (data.llm_error) note = 'Qwen tidak selesai tepat waktu, jadi ringkasan disusun otomatis dari status metrik.';
+    else if (data.repairs) note = 'Narasi Qwen tidak lolos pemeriksaan, jadi ringkasan disusun otomatis dari status metrik.';
+    else note = 'Qwen tidak aktif; ringkasan disusun otomatis dari status metrik.';
+  }
 
   return (
-    <section className="NarrativePanel card">
+    <section className="NarrativePanel card" aria-busy={loading}>
       <div className="section-header">
         <h2>Ringkasan Eksekutif</h2>
         {loading ? (
-          <span className="narrative-badge badge-loading">Menyusun ringkasan…</span>
-        ) : data?.source === 'llm' ? (
+          <span className="narrative-badge badge-loading" role="status">
+            Qwen sedang menulis…
+          </span>
+        ) : isLlm ? (
           <span className="narrative-badge badge-llm">
-            Ringkasan AI · Qwen3 lokal{data.model ? ` (${data.model})` : ''}
+            {data.label || 'Ringkasan AI · Qwen3 lokal'}
+            {data.model ? ` (${data.model})` : ''}
           </span>
         ) : data ? (
-          <span className="narrative-badge badge-template">
-            {data.label || 'Ringkasan otomatis (tanpa AI)'}
-          </span>
+          <span className="narrative-badge badge-template">{data.label || 'Ringkasan otomatis (tanpa AI)'}</span>
         ) : null}
       </div>
 
       {loading && (
-        <p className="narrative-loading" role="status">
-          Menyusun ringkasan…
-        </p>
+        <div className="narrative-writing" role="status">
+          <span className="writing-dot" />
+          <span className="writing-dot" />
+          <span className="writing-dot" />
+          <span className="writing-text">Qwen sedang menulis ringkasan dari hasil analisis…</span>
+        </div>
       )}
 
       {!loading && error && (
@@ -84,13 +101,15 @@ export default function NarrativePanel({ result }) {
         </p>
       )}
 
-      {!loading && !error && paragraphs.length > 0 && (
+      {!loading && paragraphs.length > 0 && (
         <div className="narrative-body">
           {paragraphs.map((p, idx) => (
             <p key={idx}>{p}</p>
           ))}
         </div>
       )}
+
+      {!loading && note && <p className="meta-note">{note}</p>}
     </section>
   );
 }

@@ -2,13 +2,21 @@
 // R-09: kirim think: false, keep_alive, format (opsional), cek res.ok, fallback ke fallbackModel bila gagal.
 import env from '../config/env.js';
 
-async function callGenerate(prompt, model, format) {
+// REV-06: batasi panjang keluaran agar narasi selesai < 30 detik di laptop (qwen3:1.7b ~ 50 dtk tanpa batas)
+const DEFAULT_OPTIONS = () => ({
+  num_predict: env.ollama.numPredict,
+  temperature: 0.3,
+  num_ctx: 4096,
+});
+
+async function callGenerate(prompt, model, format, options) {
   const body = {
     model,
     prompt,
     stream: false,
     think: false,
-    keep_alive: '10m',
+    keep_alive: '30m',
+    options: { ...DEFAULT_OPTIONS(), ...(options ?? {}) },
   };
   if (format) body.format = format;
 
@@ -25,12 +33,12 @@ async function callGenerate(prompt, model, format) {
   return { response: data.response, model };
 }
 
-export async function chat(prompt, { model = env.ollama.model, format } = {}) {
+export async function chat(prompt, { model = env.ollama.model, format, options } = {}) {
   try {
-    return await callGenerate(prompt, model, format);
+    return await callGenerate(prompt, model, format, options);
   } catch (err) {
     if (env.ollama.fallbackModel && env.ollama.fallbackModel !== model) {
-      return await callGenerate(prompt, env.ollama.fallbackModel, format);
+      return await callGenerate(prompt, env.ollama.fallbackModel, format, options);
     }
     throw err;
   }

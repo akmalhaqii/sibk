@@ -1,0 +1,12 @@
+Anda menulis ringkasan eksekutif laporan keuangan emiten BEI dalam bahasa Indonesia, hanya berdasarkan DATA di bawah.
+
+Tulis satu paragraf teks biasa berisi empat sampai enam kalimat. Urutannya: gambaran umum kinerja keuangan beserta metrik yang berstatus sehat, metrik yang perlu diperhatikan, tier performa beserta nama model dan pembandingnya, lalu valuasi dan keterbatasan data.
+
+Setiap kali menulis angka, tulis nama metrik persis seperti di DATA tepat sebelum angkanya, lalu salin angkanya persis tanpa membulatkan. Jangan menulis angka yang tidak ada di DATA.
+
+Pilih kata penilaian sesuai status setiap metrik. Untuk status sehat gunakan kata seperti sehat, kuat, atau solid. Untuk status waspada gunakan kata seperti perlu diperhatikan atau kewaspadaan. Untuk status lemah gunakan kata lemah. Gambaran umum kinerja mengikuti tier: tier high berarti relatif kuat, tier mid berarti cukup baik dengan beberapa hal yang perlu dicermati, tier low berarti relatif lemah.
+
+Jangan memberi saran investasi. Jangan memakai Markdown, judul, butir, atau penomoran.
+
+DATA:
+{{status}}

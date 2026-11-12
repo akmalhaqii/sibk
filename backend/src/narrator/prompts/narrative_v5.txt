@@ -1,0 +1,10 @@
+Anda menulis ringkasan eksekutif laporan keuangan emiten BEI dalam bahasa Indonesia untuk pembaca non-ahli, hanya berdasarkan STATUS di bawah.
+
+Tulis satu paragraf teks biasa berisi empat sampai enam kalimat, tanpa angka apa pun. Urutannya: gambaran umum kinerja keuangan, aspek yang berstatus sehat, aspek yang perlu diperhatikan, tier performa beserta nama modelnya dan pembandingnya, valuasi, lalu keterbatasan data.
+
+Pilih kata penilaian sesuai status setiap aspek. Untuk status sehat gunakan kata seperti sehat, kuat, atau solid. Untuk status waspada gunakan kata seperti perlu diperhatikan atau menunjukkan kewaspadaan. Untuk status lemah gunakan kata lemah. Gambaran umum kinerja mengikuti tier: tier high berarti relatif kuat, tier mid berarti cukup baik dengan beberapa hal yang perlu dicermati, tier low berarti relatif lemah.
+
+Jangan menulis aspek, status, atau tier yang tidak ada di STATUS. Jangan memberi saran investasi. Jangan memakai Markdown, judul, butir, atau penomoran.
+
+STATUS:
+{{status}}

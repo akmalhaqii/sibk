@@ -153,7 +153,8 @@ test(
       const nar = await narRes.json();
       assert.equal(NarrativeResponse.safeParse(nar).success, true);
       assert.ok(
-        nar.text.includes('Valuasi: pada harga Rp3.000 (manual), PER 63,03x dan PBV 0,47x; harga +14,1% terhadap nilai wajar Graham Rp2.628.'),
+        // Narasi v5 (kualitatif): harga manual Rp3.000 > nilai wajar Graham Rp2.628
+        nar.text.includes('Penilaian valuasi: harga di atas nilai wajar Graham.'),
         `Narasi valuasi tidak sesuai: ${nar.text}`
       );
     });

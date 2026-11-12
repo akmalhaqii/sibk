@@ -1,0 +1,10 @@
+Anda menulis ringkasan laporan keuangan emiten BEI dalam bahasa Indonesia, hanya berdasarkan FAKTA di bawah.
+
+Tulis tepat empat paragraf teks biasa yang dipisahkan satu baris kosong. Paragraf pertama diawali "Profitabilitas:", paragraf kedua "Likuiditas dan solvabilitas:", paragraf ketiga "Pertumbuhan dan arus kas:", dan paragraf keempat "Valuasi:". Tulis awalan dan isi paragraf pada baris yang sama.
+
+Setiap paragraf berisi satu atau dua kalimat pendek. Setiap kali menulis angka, tulis nama metrik persis seperti di FAKTA tepat sebelum angkanya, lalu salin angkanya persis. Bila menyebut status, pakai status metrik itu sendiri seperti di FAKTA. Jangan menulis angka, metrik, atau status yang tidak ada di FAKTA. Bila valuasi tidak dihitung, tulis alasannya.
+
+Tulis dalam kalimat utuh; jangan menyalin daftar FAKTA baris per baris. Jangan memakai Markdown, judul, butir, atau penomoran. Jangan memberi saran investasi. Jangan menulis paragraf lain.
+
+FAKTA:
+{{facts}}

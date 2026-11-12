@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "node --watch --env-file-if-exists=.env src/server.js",
     "start": "node --env-file-if-exists=.env src/server.js",
-    "test": "node --test \"tests/**/*.test.js\"",
+    "test": "node --import ./tests/setup.js --test \"tests/**/*.test.js\"",
+    "test:online": "node --test \"tests/**/*.test.js\"",
     "export:parser": "node --env-file-if-exists=.env scripts/export_parser_output.js",
-    "build:features": "node --env-file-if-exists=.env scripts/build_features.js"
+    "build:features": "node --env-file-if-exists=.env scripts/build_features.js",
+    "eval:qwen": "node --env-file-if-exists=.env scripts/qwen_eval.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

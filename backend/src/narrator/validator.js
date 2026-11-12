@@ -86,3 +86,36 @@ export function checkNarrative(text, input = {}) {
   const pass = unmatched.length === 0;
   return { ok: pass, pass, unmatched };
 }
+
+// REV-05: kelengkapan narasi LLM. checkNarrative memeriksa kebenaran tiap klaim;
+// checkCoverage memastikan teks benar-benar berisi data, bukan salinan contoh atau isian kosong.
+const PLACEHOLDER_RE = /…|\.{3}|\[[^\]]*\]|\{\{|<[^>]+>|\bTBD\b/i;
+
+export function countAvailableNumbers(input = {}) {
+  return [input.profitability, input.liquidity, input.solvency, input.growth_cash]
+    .flatMap((g) => Object.values(g ?? {}))
+    .filter((item) => item?.display && item.display !== '—').length;
+}
+
+export function checkCoverage(text, input = {}, { minNumbers = 3 } = {}) {
+  const problems = [];
+  if (!text || typeof text !== 'string') {
+    return { ok: false, problems: ['empty_text'], matched: 0 };
+  }
+  if (PLACEHOLDER_RE.test(text)) problems.push('placeholder');
+
+  const allowed = collectAllowedNumbers(input);
+  const tokens = (text.replace(/Rp\s*/g, '').match(/[+−-]?\d[\d.,]*\s?[%x]/g) || [])
+    .map((t) => t.trim().replace(/[.,]+$/, ''))
+    .filter((t) => allowed.has(t) || allowed.has(t.replace(/^[+−-]/, '')));
+  const matched = new Set(tokens).size;
+  const need = Math.min(minNumbers, countAvailableNumbers(input));
+  if (matched < need) problems.push('too_few_numbers');
+
+  const hasProfit = Object.values(input.profitability ?? {}).some((m) => m?.display);
+  if (hasProfit && !/(^|\n)\s*Profitabilitas\s*:/i.test(text)) problems.push('missing_topic:Profitabilitas');
+  if ((input.limitations ?? []).length > 0 && !/(^|\n)\s*Keterbatasan\s*:/i.test(text)) {
+    problems.push('missing_topic:Keterbatasan');
+  }
+  return { ok: problems.length === 0, problems, matched };
+}

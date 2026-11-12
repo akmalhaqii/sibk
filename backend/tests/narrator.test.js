@@ -115,13 +115,14 @@ test('REV-03: checkPlainText menolak teks mentah AKRA dengan markdown_symbol dan
 
 test('REV-03: generateNarrative dengan chatFn Markdown berangka valid menghasilkan source llm dan lolos checkPlainText', async () => {
   const res = await generateNarrative(mockAnalyze, {
+    style: 'facts',
     useLlm: true,
     pingFn: async () => 'ok',
     chatFn: async () => ({
       response: [
         '**Ringkasan SMGR Q1 2026**',
         '- **Profitabilitas**: ROE tercatat 0,7% (lemah), ROA 0,4% (lemah), dan margin laba bersih 0,8% (lemah).',
-        '- **Likuiditas dan solvabilitas**: current ratio 1,14x (waspada) dan DER 0,55x (sehat).',
+        '- **Likuiditas dan solvabilitas**: current ratio 1,14x (waspada) dan DER 0,55x (waspada).',
         '- **Tier performa**: SMGR berada pada tier mid berdasarkan model tier_kmeans_v1.',
         '- **Keterbatasan**: Rasio disetahunkan dari Q1.',
       ].join('\n'),
@@ -130,7 +131,7 @@ test('REV-03: generateNarrative dengan chatFn Markdown berangka valid menghasilk
   });
 
   assert.equal(res.source, 'llm');
-  assert.equal(res.prompt_version, 'narrative_v2');
+  assert.equal(res.prompt_version, 'narrative_v6');
   assert.equal(checkPlainText(res.text).ok, true);
 });
 

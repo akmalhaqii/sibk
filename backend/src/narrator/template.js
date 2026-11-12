@@ -32,7 +32,7 @@ export function templateSummary(input = {}) {
   // 2. Likuiditas dan solvabilitas
   const liqSolvItems = [
     fmtItem('current ratio', input.liquidity?.current_ratio),
-    fmtItem('DER', input.solvency?.der),
+    fmtItem('liabilitas terhadap ekuitas', input.solvency?.der), // A-2: bukan DER utang berbunga
     fmtItem('liabilitas terhadap aset', input.solvency?.liability_to_asset),
   ].filter(Boolean);
   if (liqSolvItems.length > 0) {
@@ -60,7 +60,13 @@ export function templateSummary(input = {}) {
 
   // 4. Valuasi
   const val = input.valuation ?? {};
-  if (!val.price) {
+  // Tahap 5: laporan non-IDR (tahap 4-C) -> sebut alasannya, bukan "harga belum tersedia"
+  const currencyReason = [val.per, val.pbv, val.fair_value]
+    .map((x) => x?.reason)
+    .find((r) => r && /^laporan dalam /.test(r));
+  if (currencyReason) {
+    paragraphs.push(`Valuasi: belum dihitung karena ${currencyReason}.`);
+  } else if (!val.price) {
     paragraphs.push(
       'Valuasi: harga belum tersedia, sehingga PER, PBV, dan premium terhadap nilai wajar belum dapat dihitung.'
     );

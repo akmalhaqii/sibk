@@ -93,6 +93,14 @@ export const AnalyzeResponse = Extracted.extend({
   valuation: z.record(ValuationItem),
 });
 
+// REV-05: body POST /api/narrative dan POST /api/report minimal berupa hasil analisis
+export const AnalysisInput = z
+  .object({
+    entity: z.object({ ticker: z.string().min(1) }).passthrough(),
+    metrics: z.record(z.object({ value: nullableNumber, display: z.string().nullable().optional() }).passthrough()),
+  })
+  .passthrough();
+
 // POST /api/narrative
 export const NarrativeResponse = z.object({
   source: z.enum(['llm', 'template']),
@@ -101,6 +109,8 @@ export const NarrativeResponse = z.object({
   checks_passed: z.boolean(),
   model: z.string().optional(), // NFR-08: nama model + versi prompt dicatat
   prompt_version: z.string().optional(),
+  repairs: z.object({}).passthrough().optional(), // REV-06: kalimat yang dibuang & topik yang dilengkapi
+  llm_error: z.string().optional(),
 });
 
 // ---------- berkas model klaster (dihasilkan ai-model, dibaca backend) ----------
