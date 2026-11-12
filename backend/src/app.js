@@ -7,6 +7,8 @@ import narrative from './routes/narrative.js';
 import price from './routes/price.js';
 import health from './routes/health.js';
 import report from './routes/report.js';
+import chat from './routes/chat.js';
+import analyses from './routes/analyses.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -20,6 +22,8 @@ app.use('/api/narrative', narrative);
 app.use('/api/price', price);
 app.use('/api/health', health);
 app.use('/api/report', report); // FR-OUT-01
+app.use('/api/chat', chat); // Chatbot Tahap 1
+app.use('/api/analyses', analyses);
 
 app.use(errorHandler);
 export default app;

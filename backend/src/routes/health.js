@@ -5,13 +5,15 @@ import { pingOllama } from '../narrator/client.js';
 
 const router = Router();
 router.get('/', async (_req, res) => {
+  const chatOn = env.chat.enabled && process.env.CHAT_ENABLED !== 'false';
+  const pageOn = chatOn && env.chat.pageEnabled && process.env.CHAT_PAGE_ENABLED !== 'false';
   res.json({
     server: 'ok',
     ollama: await pingOllama(),
     features: {
-      chat: env.chat.enabled,
-      chat_page: env.chat.enabled && env.chat.pageEnabled,
-      chat_free_mode: env.chat.enabled && Boolean(env.chat.financeModel),
+      chat: chatOn,
+      chat_page: pageOn,
+      chat_free_mode: chatOn && Boolean(env.chat.financeModel),
     },
   });
 });

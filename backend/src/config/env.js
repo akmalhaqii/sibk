@@ -32,6 +32,7 @@ export default {
   dataDir: r(process.env.DATA_DIR, '../data'),
   uploadDir: r(process.env.UPLOAD_DIR, '../data/uploads'),
   cacheDir: r(process.env.CACHE_DIR, '../data/cache'),
+  chatSessionDir: r(process.env.CHAT_SESSION_DIR, '../data/chat_sessions'),
   parserOutputDir: r(process.env.PARSER_OUTPUT_DIR, '../data/processed/parser_output'),
   tierModelPath: r(process.env.TIER_MODEL_PATH, './models/tier_kmeans.json'),
   maxUploadMb: Number(process.env.MAX_UPLOAD_MB || 50),

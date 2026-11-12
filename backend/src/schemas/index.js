@@ -128,3 +128,29 @@ export const TierModel = z.object({
   tier_by_cluster: z.array(Tier).length(3), // indeks = nomor klaster
   evaluation: z.object({ silhouette: z.number(), davies_bouldin: z.number() }).partial().optional(),
 });
+
+// ---------- chatbot (C2) ----------
+export const ChatSessionCreate = z.union([
+  z.object({
+    result: AnalysisInput,
+    mode: z.literal('analysis').optional(),
+    origin: z.string().optional(),
+  }),
+  z.object({
+    mode: z.enum(['glossary_only', 'free']),
+    origin: z.string().optional(),
+  }),
+]);
+
+export const ChatSessionPatch = z
+  .object({
+    result: AnalysisInput.optional(),
+    title: z.string().trim().min(1).max(80).optional(),
+  })
+  .refine((v) => v.result !== undefined || v.title !== undefined, {
+    message: 'Sertakan result atau title untuk memperbarui sesi.',
+  });
+
+export const ChatMessageCreate = z.object({
+  content: z.string().trim().min(1).max(500),
+});
