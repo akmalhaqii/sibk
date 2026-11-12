@@ -19,5 +19,5 @@ export default {
     fallbackModel: process.env.OLLAMA_FALLBACK_MODEL || 'qwen3:1.7b',
     timeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS || 60000),
   },
-  promptVersion: process.env.PROMPT_VERSION || 'narrative_v1',
+  promptVersion: process.env.PROMPT_VERSION || 'narrative_v2',
 };

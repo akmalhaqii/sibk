@@ -7,10 +7,11 @@ import { buildInput } from './input.js';
 import { chat, pingOllama } from './client.js';
 import { checkNarrative } from './validator.js';
 import { templateSummary } from './template.js';
+import { toPlainText, checkPlainText } from './plaintext.js';
 
 const promptPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  'prompts/narrative_v1.txt'
+  `prompts/${env.promptVersion}.txt`
 );
 
 export function buildPrompt(input) {
@@ -37,9 +38,10 @@ export async function generateNarrative(
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const { response, model } = await chatFn(buildPrompt(input));
-      const text = String(response || '').trim();
+      const text = toPlainText(response);
+      const format = checkPlainText(text);
       const check = checkNarrative(text, input);
-      if (check.ok) {
+      if (format.ok && check.ok) {
         return {
           source: 'llm',
           label: 'Ringkasan AI · Qwen3 lokal',
@@ -49,6 +51,10 @@ export async function generateNarrative(
           prompt_version: env.promptVersion,
         };
       }
+      console.warn(
+        `[narrator] attempt ${attempt + 1} rejected (${input?.ticker || 'UNKNOWN'}):`,
+        { formatProblems: format.problems, checkReason: check.reason, unmatched: check.unmatched }
+      );
     } catch {
       break;
     }

@@ -2,6 +2,27 @@
 import { useState, useEffect } from 'react';
 import { narrative } from '../api/client.js';
 
+function cleanPlainText(raw = '') {
+  let t = String(raw).replace(/\r\n?/g, '\n');
+  t = t.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  t = t.replace(/```[a-z]*\n?/gi, '');
+  t = t.replace(/(^|\n)[ \t]*\*\*([^*\n]+)\*\*[ \t]+(?=[-*•][ \t])/g, '$1$2\n');
+  t = t.replace(/^[ \t]*#{1,6}[ \t]+(.*)$/gm, '\n$1\n');
+  t = t.replace(/^[ \t]*(?:\*\*|__)([^*_\n]+)(?:\*\*|__)[ \t]*$/gm, '\n$1\n');
+  t = t.replace(/^[ \t]*(?:[-*•+]|\d+[.)])[ \t]+/gm, '\n');
+  t = t.replace(/([.!?])[ \t]+[-*•][ \t]+(?=\S)/g, '$1\n\n');
+  t = t.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/__([^_]+)__/g, '$1');
+  t = t.replace(/`([^`]*)`/g, '$1');
+  t = t.replace(/^[ \t]*>[ \t]?/gm, '');
+  t = t.replace(/[*#`|]/g, '');
+  return t
+    .split(/\n{2,}|\n(?=\S)/)
+    .map((p) => p.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .filter((p) => /[.!?]$/.test(p) || p.length > 80)
+    .join('\n\n');
+}
+
 export default function NarrativePanel({ result }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -29,7 +50,7 @@ export default function NarrativePanel({ result }) {
     };
   }, [result]);
 
-  const paragraphs = (data?.text || '')
+  const paragraphs = cleanPlainText(data?.text || '')
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean);

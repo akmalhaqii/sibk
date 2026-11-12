@@ -135,14 +135,16 @@ function extractShareCountFromLabel(rows) {
   return null;
 }
 
-export function mapFields(rows = [], { ticker = 'UNKNOWN' } = {}) {
+export function mapFields(rows = [], { ticker } = {}) {
   const meta = rows._meta ?? {
+    ticker: 'UNKNOWN',
     unit: 'juta IDR',
     locale: 'id-dot',
     period_end: '2026-03-31',
     period_type: 'Q1',
     source: 'company_pdf',
   };
+  const resolvedTicker = ticker || meta.ticker || 'UNKNOWN';
 
   const fields = {};
   const matchedRowIndices = new Set();
@@ -200,7 +202,7 @@ export function mapFields(rows = [], { ticker = 'UNKNOWN' } = {}) {
 
   return {
     entity: {
-      ticker,
+      ticker: resolvedTicker,
       period_end: meta.period_end,
       period_type: meta.period_type,
       unit: meta.unit,

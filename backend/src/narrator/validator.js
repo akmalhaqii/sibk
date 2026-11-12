@@ -1,5 +1,9 @@
 // FR-NAR-02 / FR-TIER-03: setiap angka, tier, dan klaim tren di teks harus ada di data sumber
 const FORBIDDEN_RE = /\b(beli|jual|tahan|rekomendasi|buy|sell|hold)\b/i;
+// REV-04: kata tren tanpa data periode dan status tanpa metrik
+const TREND_RE = /\b(stabil|konsisten|membaik|memburuk|fluktuatif|berfluktuasi|ketidakseimbangan)\b/i;
+const STATUS_RE = /\b(sehat|waspada|lemah)\b/i;
+const NUMBER_RE = /\d[\d.,]*\s?[%x]/;
 
 function collectAllowedNumbers(input = {}) {
   const allowed = new Set();
@@ -7,10 +11,12 @@ function collectAllowedNumbers(input = {}) {
     if (!str || typeof str !== 'string' || str === '—') return;
     const trimmed = str.trim();
     allowed.add(trimmed);
-    // Izinkan variasi tanpa awalan Rp atau tanda +
+    // Izinkan variasi tanpa awalan Rp, tanda +, atau tanda minus Unicode (U+2212) vs ASCII (-)
     const noRp = trimmed.replace(/^Rp\s*/i, '');
     allowed.add(noRp);
-    allowed.add(noRp.replace(/^\+/, ''));
+    allowed.add(noRp.replace(/^[+−-]/, ''));
+    allowed.add(noRp.replace(/^−/, '-'));
+    allowed.add(noRp.replace(/^-/, '−'));
   };
 
   for (const group of [input.profitability, input.liquidity, input.solvency, input.growth_cash]) {
@@ -37,6 +43,16 @@ export function checkNarrative(text, input = {}) {
     return { ok: false, pass: false, unmatched: ['forbidden_word'], reason: 'forbidden_word' };
   }
 
+  if (TREND_RE.test(text)) {
+    return { ok: false, pass: false, unmatched: ['trend_word'], reason: 'trend_word' };
+  }
+
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const badStatus = sentences.find((s) => STATUS_RE.test(s) && !NUMBER_RE.test(s));
+  if (badStatus) {
+    return { ok: false, pass: false, unmatched: ['status_without_metric'], reason: 'status_without_metric' };
+  }
+
   // Cek kesesuaian label tier bila kata "tier" disebut
   const tierMatch = text.match(/\btier\s+(low|mid|high)\b/i);
   if (tierMatch && input?.tier?.label) {
@@ -55,14 +71,14 @@ export function checkNarrative(text, input = {}) {
     .replace(/Rp\s*/g, '');
 
   const allowed = collectAllowedNumbers(input);
-  const tokens = cleaned.match(/[+-]?\d[\d.,]*\s?[%x]?/g) || [];
+  const tokens = cleaned.match(/[+−-]?\d[\d.,]*\s?[%x]?/g) || [];
   const unmatched = [];
 
   for (const rawTok of tokens) {
     const tok = rawTok.trim().replace(/[.,]+$/, '');
     if (!tok) continue;
-    const tokNoPlus = tok.replace(/^\+/, '');
-    if (!allowed.has(tok) && !allowed.has(tokNoPlus)) {
+    const tokNoSign = tok.replace(/^[+−-]/, '');
+    if (!allowed.has(tok) && !allowed.has(tokNoSign)) {
       unmatched.push(tok);
     }
   }

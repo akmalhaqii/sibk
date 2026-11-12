@@ -140,11 +140,15 @@ test(
       assert.equal(withPrice.valuation.pbv.display, '0,47x');
       assert.equal(withPrice.valuation.premium_discount.display, '+14,1%');
 
+      const prevUseOllama = process.env.USE_OLLAMA;
+      process.env.USE_OLLAMA = 'false';
       const narRes = await fetch(`${baseUrl}/api/narrative`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(withPrice),
       });
+      if (prevUseOllama === undefined) delete process.env.USE_OLLAMA;
+      else process.env.USE_OLLAMA = prevUseOllama;
       assert.equal(narRes.status, 200);
       const nar = await narRes.json();
       assert.equal(NarrativeResponse.safeParse(nar).success, true);
