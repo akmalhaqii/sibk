@@ -4,9 +4,11 @@
 export default function AnalyzingOverlay() {
   return (
     <div className="analyzing-overlay" role="status" aria-live="polite">
-      <div className="spinner" />
-      <p>Menganalisis laporan…</p>
-      <small>Membaca PDF, memvalidasi angka, menghitung metrik, tier, dan valuasi.</small>
+      <div className="analysis-progress card">
+        <div className="spinner" aria-hidden="true" />
+        <p>Menganalisis laporan…</p>
+        <small>Membaca PDF, memvalidasi angka, menghitung metrik, tier, dan valuasi.</small>
+      </div>
     </div>
   );
 }

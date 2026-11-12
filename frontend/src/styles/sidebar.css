@@ -1,0 +1,170 @@
+.app-shell {
+  --sidebar-width: 236px;
+  --sidebar-surface: #222c3c;
+  --sidebar-text: #e9edf5;
+  --sidebar-accent: #f0d7a0;
+  --sidebar-ink: #202836;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-shell--collapsed { --sidebar-width: 72px; }
+.app-content { min-width: 0; }
+.app-content [id] { scroll-margin-block-start: 24px; }
+.app-content [tabindex="-1"]:focus-visible { outline: 2px solid #294e9b; outline-offset: 3px; }
+
+.app-skip-link {
+  position: fixed;
+  inset: 12px auto auto 12px;
+  z-index: 60;
+  transform: translateY(-160%);
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fffefa;
+  color: var(--sidebar-ink);
+  font-weight: 650;
+}
+
+.app-skip-link:focus { transform: none; }
+
+.app-sidebar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+  align-self: start;
+  height: 100vh;
+  height: 100dvh;
+  padding: 20px 14px;
+  overflow-y: auto;
+  background: var(--sidebar-surface);
+  color: var(--sidebar-text);
+}
+
+.sidebar-header,
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-header {
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 29px;
+}
+
+.sidebar-brand {
+  gap: 9px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 9px;
+}
+
+.sidebar-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 39px;
+  border-radius: 9px;
+  background: #294e9b;
+}
+
+.sidebar-brand-mark img { display: block; }
+
+.sidebar-brand-name {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.sidebar-toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 1px solid #485467;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover { background: #354155; }
+
+.sidebar-navigation,
+.sidebar-result-links {
+  display: grid;
+  gap: 5px;
+}
+
+.sidebar-result-links {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 13px 0 0;
+  border-top: 1px solid #495469;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.sidebar-icon { flex: 0 0 21px; }
+.sidebar-link:hover { background: #354155; }
+
+.sidebar-link[aria-current] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-ink);
+}
+
+.app-sidebar :is(a, button):focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 3px;
+}
+
+.app-shell--collapsed .app-sidebar { padding-inline: 12px; }
+
+.app-shell--collapsed .sidebar-header {
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.app-shell--collapsed .sidebar-link {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.app-shell--collapsed :is(.sidebar-brand-name, .sidebar-label) { display: none; }
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 761px) {
+  .app-shell { transition: grid-template-columns 180ms ease; }
+}
+
+@media (max-width: 760px) {
+  .app-shell { display: block; }
+  .app-sidebar { height: auto; max-height: 65dvh; padding: 10px 14px; }
+  .app-shell--collapsed .sidebar-header,
+  .sidebar-header { flex-direction: row; margin-bottom: 8px; }
+  .app-shell--collapsed .sidebar-brand-name { display: inline; }
+  .sidebar-result-links { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 3px; padding-top: 7px; }
+  .app-shell--collapsed .sidebar-navigation { display: flex; gap: 5px; overflow-x: auto; padding: 3px; }
+  .app-shell--collapsed .sidebar-result-links { display: flex; margin: 0; padding: 0; border: 0; }
+  .app-shell--collapsed .sidebar-link { min-width: 40px; min-height: 40px; }
+  .app-content [id] { scroll-margin-block-start: 250px; }
+  .app-shell--collapsed .app-content [id] { scroll-margin-block-start: 122px; }
+}

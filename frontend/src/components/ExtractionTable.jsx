@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import SourcePageLink from './SourcePageLink.jsx';
 import { fmtNumber, fmtPct } from '../utils/format.js';
+import '../styles/extraction.css';
 
 export const parseId = (s) => {
   const t = String(s ?? '')
@@ -77,13 +78,13 @@ export default function ExtractionTable({
   }
 
   return (
-    <section className="ExtractionTable card">
+    <section className="ExtractionTable card" aria-labelledby="extraction-table-title">
       <div className="extraction-header">
         <div>
-          <h2>Tabel Angka Hasil Ekstraksi &amp; Koreksi</h2>
+          <h2 id="extraction-table-title">Angka dari laporan</h2>
           <p className="section-subtitle">
-            Ubah angka pada kolom <strong>Nilai</strong> jika diperlukan (format titik ribuan Indonesia diterima, mis.{' '}
-            <code>47.792.046</code>), lalu klik <strong>Hitung ulang</strong>.
+            Buka halaman PDF untuk memeriksa sumbernya. Untuk mengoreksi angka, ubah kolom <strong>Nilai</strong>,
+            lalu pilih <strong>Hitung ulang</strong>. Kamu bisa memakai titik ribuan, misalnya <code>47.792.046</code>.
           </p>
         </div>
 
@@ -107,16 +108,25 @@ export default function ExtractionTable({
         </div>
       </div>
 
-      <div className="table-responsive">
+      <p className="extraction-scroll-hint">Geser tabel untuk melihat kolom lainnya.</p>
+      <div className="table-responsive" role="region" aria-label="Tabel angka ekstraksi" tabIndex={0}>
         <table className="data-table">
+          <colgroup>
+            <col className="extraction-col-label" />
+            <col className="extraction-col-value" />
+            <col className="extraction-col-prior" />
+            <col className="extraction-col-page" />
+            <col className="extraction-col-confidence" />
+            <col className="extraction-col-status" />
+          </colgroup>
           <thead>
             <tr>
-              <th>Pos Laporan</th>
-              <th className="col-num">Nilai ({entity.unit || 'juta IDR'})</th>
-              <th className="col-num">Pembanding (Prior)</th>
-              <th className="col-center">Halaman</th>
-              <th className="col-center">Kecocokan</th>
-              <th className="col-center">Status</th>
+              <th scope="col">Pos laporan</th>
+              <th scope="col" className="col-num">Nilai ({entity.unit || 'juta IDR'})</th>
+              <th scope="col" className="col-num">Pembanding</th>
+              <th scope="col" className="col-center">Halaman</th>
+              <th scope="col" className="col-center">Kecocokan</th>
+              <th scope="col" className="col-center">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -133,14 +143,15 @@ export default function ExtractionTable({
                   key={key}
                   className={isDraftChanged ? 'row-dirty' : item?.corrected ? 'row-corrected' : ''}
                 >
-                  <td>
+                  <th scope="row">
                     <div className="pos-label">{item?.label || key}</div>
                     <code className="pos-key">{key}</code>
-                  </td>
+                  </th>
                   <td className="col-num">
                     <input
                       type="text"
                       aria-label={`Nilai ${key}`}
+                      aria-invalid={isInvalidDraft || undefined}
                       data-field-key={key}
                       className={`cell-input ${isInvalidDraft ? 'input-invalid' : ''}`}
                       value={displayValue}

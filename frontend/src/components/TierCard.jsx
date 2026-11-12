@@ -2,20 +2,20 @@
 import { fmtNumber } from '../utils/format.js';
 
 const TIER_TITLES = {
-  high: 'HIGH — Kesehatan Kuat',
-  mid: 'MID — Kesehatan Menengah',
-  low: 'LOW — Kesehatan Lemah',
+  high: 'Kesehatan kuat',
+  mid: 'Kesehatan menengah',
+  low: 'Kesehatan lemah',
 };
 
 export default function TierCard({ tiering }) {
   const tier = tiering?.tier ?? null;
-  const modelVersion = tiering?.model_version ?? '—';
+  const modelVersion = tiering?.model_version;
   const distance = tiering?.distance_to_centroid;
 
   return (
     <section className="TierCard card">
       <div className="section-header">
-        <h2>Tier Performa Klaster</h2>
+        <h2>Tier performa klaster</h2>
         {modelVersion && <span className="meta-pill">{modelVersion}</span>}
       </div>
 
@@ -26,7 +26,7 @@ export default function TierCard({ tiering }) {
             <div className="tier-title">{TIER_TITLES[tier] ?? `Tier ${tier}`}</div>
             {distance != null && (
               <div className="tier-distance">
-                Jarak ke pusat klaster (centroid): <strong>{fmtNumber(distance, 4)}</strong>
+                Jarak ke pusat klaster <strong>{fmtNumber(distance, 4)}</strong>
               </div>
             )}
           </div>
