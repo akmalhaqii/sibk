@@ -28,6 +28,8 @@ const ALIASES = [
   ['ocf_to_assets', ['arus kas operasi terhadap aset', 'arus kas terhadap aset', 'ocf to assets']],
   // Istilah yang tidak punya angka di data narasi: angka yang ditempel padanya selalu ditolak
   ['@none', ['arus kas bersih', 'arus kas tahunan', 'arus kas investasi', 'arus kas pendanaan', 'kas bersih', 'laba kotor', 'laba usaha']],
+  ['@page', ['halaman', 'hal']],
+  ['@threshold', ['ambang batas', 'ambang', 'batas', 'minimum', 'maksimal', 'standar']],
   ['@cash', ['arus kas operasi', 'arus kas']],
   // "Pendapatan emiten mengalami pertumbuhan -10,3%": angka boleh milik salah satu metrik pertumbuhan
   ['@growth', ['pertumbuhan', 'tumbuh', 'bertumbuh']],
@@ -76,6 +78,8 @@ export function buildCatalog(input = {}) {
   }
   cat['@valuation'] = { displays: valDisplays, status: null };
   cat['@none'] = { displays: new Set(), status: null };
+  cat['@page'] = { displays: new Set(), status: null };
+  cat['@threshold'] = { displays: new Set(), status: null };
   for (const [g, members] of Object.entries(GROUPS)) {
     const displays = new Set();
     for (const m of members) for (const d of cat[m]?.displays ?? []) displays.add(d);
@@ -89,7 +93,7 @@ const ALIAS_LIST = ALIASES.flatMap(([key, names]) => names.map((name) => ({ key,
   .sort((a, b) => b.name.length - a.name.length);
 
 // Temukan semua kemunculan alias (tanpa tumpang tindih; alias terpanjang menang)
-function findAliases(sentence) {
+export function findAliases(sentence) {
   const lower = sentence.toLowerCase();
   const taken = new Array(lower.length).fill(false);
   const hits = [];
@@ -147,7 +151,9 @@ export function checkSentenceBinding(sentence, catalog) {
       }
     }
     const entry = catalog[owner.key];
-    if (!entry || !entry.displays.has(n.tok)) {
+    const isThresholdCtx = aliases.some((a) => a.key === '@threshold' && a.start >= prevEnd && a.start < n.start);
+    const thMatch = Boolean(isThresholdCtx && entry?.thresholds?.has(n.tok));
+    if (!thMatch && (!entry || !entry.displays.has(n.tok))) {
       return { ok: false, reason: `angka ${n.tok} bukan milik ${owner.key}`, bound };
     }
     // Status setelah angka: sampai alias berikutnya / angka berikutnya / akhir kalimat
@@ -157,7 +163,7 @@ export function checkSentenceBinding(sentence, catalog) {
     // Status boleh ditulis sebelum angka ("ROE berstatus lemah sebesar 0,7%") atau sesudahnya
     const window = (sentence.slice(owner.end, n.start) + ' ' + sentence.slice(n.end, winEnd)).toLowerCase();
     const said = STATUS_WORDS.find((w) => new RegExp(`(?<!\\p{L})${w}(?!\\p{L})`, 'u').test(window));
-    if (said) {
+    if (said && !thMatch) {
       const members = entry.members ?? [owner.key];
       const okStatus = members.some((k) => catalog[k]?.displays.has(n.tok) && catalog[k]?.status === said);
       if (!okStatus) return { ok: false, reason: `status ${said} tidak sesuai untuk ${owner.key} ${n.tok}`, bound };

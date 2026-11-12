@@ -154,7 +154,7 @@ function maskAllowedNumbers(s) {
 }
 
 // allowNumbers (v6): angka boleh, tetapi setiap angka harus tertempel ke metrik & status yang benar (binding.js)
-export function checkQualitativeSentence(sentence, input = {}, { allowNumbers = false, catalog = null } = {}) {
+export function checkQualitativeSentence(sentence, input = {}, { allowNumbers = false, catalog = null, allowThresholds = false } = {}) {
   if (FORBIDDEN_RE.test(sentence)) return `kata terlarang "${sentence.match(FORBIDDEN_RE)[1]}"`;
   if (TREND_RE.test(sentence)) return `kata tren "${sentence.match(TREND_RE)[1]}"`;
   if (/…|\.{3}|\[[^\]]*\]|\{\{/.test(sentence)) return 'isian kosong';
@@ -184,8 +184,9 @@ export function checkQualitativeSentence(sentence, input = {}, { allowNumbers = 
 
   const statuses = aspectStatuses(input);
   for (const clause of clausesOf(sentence)) {
-    // Klausa tentang tier/valuasi/keterbatasan tidak dinilai dengan status metrik
+    // Klausa tentang tier/valuasi/keterbatasan tidak dinilai dengan status metrik (serta klausa ambang pada chat)
     if (/\btier\b|valuasi|keterbatasan|disetahunkan|treasuri/i.test(clause)) continue;
+    if (allowThresholds && /\b(?:ambang|batas)\b/i.test(clause)) continue;
     const aspects = [...new Set(findTerms(clause, ASPECT_TERMS).map((h) => h.key))];
     const sentiments = [...new Set(findTerms(clause, SENTIMENT_TERMS).map((h) => h.key))];
     if (!aspects.length || !sentiments.length) continue;

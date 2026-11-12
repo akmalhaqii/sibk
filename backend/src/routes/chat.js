@@ -1,15 +1,17 @@
 // C2/C3: endpoint sesi chat (/api/chat/*). Bila CHAT_ENABLED=false, semua endpoint mengembalikan 404.
 import { Router } from 'express';
 import env from '../config/env.js';
-import { ChatSessionCreate, ChatSessionPatch } from '../schemas/index.js';
+import { ChatMessageCreate, ChatSessionCreate, ChatSessionPatch } from '../schemas/index.js';
 import {
   createSession,
   deleteSession,
   getSession,
   isValidSessionId,
   listSessions,
+  setSessionPending,
   updateSession,
 } from '../chat/sessions.js';
+import { answerQuestion } from '../chat/service.js';
 
 const router = Router();
 
@@ -86,6 +88,49 @@ router.delete('/sessions/:id', async (req, res, next) => {
     res.status(204).end();
   } catch (e) {
     next(e);
+  }
+});
+
+router.post('/sessions/:id/messages', async (req, res) => {
+  if (!isValidSessionId(req.params.id)) {
+    return res.status(404).json({ error: 'Sesi tidak ditemukan' });
+  }
+  const parsed = ChatMessageCreate.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Pesan harus berisi 1 sampai 500 karakter.' });
+  }
+  const session = await getSession(req.params.id);
+  if (!session) {
+    return res.status(404).json({ error: 'Sesi tidak ditemukan' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders?.();
+
+  let clientGone = false;
+  res.on('close', () => {
+    if (!res.writableEnded) clientGone = true;
+  });
+
+  const emit = (event, data) => {
+    if (clientGone || res.writableEnded) return;
+    try {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    } catch {
+      clientGone = true;
+    }
+  };
+
+  try {
+    await answerQuestion({ session, question: parsed.data.content, emit });
+  } catch (err) {
+    await setSessionPending(session.id, false).catch(() => {});
+    emit('error', { error: err?.message || 'Gagal memproses pesan.' });
+  } finally {
+    if (!res.writableEnded) res.end();
   }
 });
 
