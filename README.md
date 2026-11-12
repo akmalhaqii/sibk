@@ -72,3 +72,7 @@ keduanya
 - [contract.mock.test.js](backend/tests/contract.mock.test.js) memvalidasi **semua** `frontend/src/mock/*.json`;
   mock baru wajib didaftarkan. Kontrak berubah tapi mock belum diperbarui → `npm test` gagal.
 - Frontend dengan mock: `VITE_USE_MOCK=true` di `frontend/.env`.
+
+## Kontributor
+
+- [@akmalhaqii](https://github.com/akmalhaqii)
