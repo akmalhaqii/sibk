@@ -25,7 +25,7 @@ test('backtest seluruh PDF referensi (SMGR, AKRA, AADI — company & BEI)', asyn
     await t.test(`backtest ${file}`, async () => {
       const fullPath = path.join(pdfDir, file);
       const initial = await runPipeline({ file: { path: fullPath, filename: file } });
-      const res = await recompute({ ...initial, manual_price: 1500 });
+      const res = await recompute({ ...initial, price: 1500 });
 
       const parsed = AnalyzeResponse.safeParse(res);
       assert.equal(
@@ -41,7 +41,7 @@ test('backtest seluruh PDF referensi (SMGR, AKRA, AADI — company & BEI)', asyn
       );
 
       for (const chk of res.validation.checks) {
-        assert.equal(chk.pass, true, `${file} cek ${chk.check} harus pass=true`);
+        assert.equal(chk.pass, true, `${file} cek ${chk.name} harus pass=true`);
       }
 
       // Pastikan metrik profitabilitas utama terhitung (ROE, ROA, Net Margin)

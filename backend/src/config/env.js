@@ -14,7 +14,7 @@ export default {
   tierModelPath: r(process.env.TIER_MODEL_PATH, './models/tier_kmeans.json'),
   maxUploadMb: Number(process.env.MAX_UPLOAD_MB || 50),
   ollama: {
-    url: process.env.OLLAMA_URL || 'http://localhost:11434',
+    url: process.env.OLLAMA_URL || 'http://127.0.0.1:11434',
     model: process.env.OLLAMA_MODEL || 'qwen3:4b',
     fallbackModel: process.env.OLLAMA_FALLBACK_MODEL || 'qwen3:1.7b',
     timeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS || 60000),

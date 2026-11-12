@@ -22,6 +22,7 @@ export const Entity = z.object({
   period_end: z.string().optional(),
   period_type: PeriodType.optional(), // baru (R-06)
   unit: z.string().optional(),
+  currency: z.enum(['IDR', 'USD']).optional(), // Tahap 4-C
   locale: z.enum(['id-dot', 'en-comma']).optional(),
   source: z.enum(['company_pdf', 'bei_pdf']).optional(),
   file_id: z.string().optional(),     // baru (R-03)

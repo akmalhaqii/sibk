@@ -16,8 +16,8 @@ test('metrics: 9 rasio dan status SMGR Q1 2026 sesuai acuan (presisi 1e-6)', () 
 
   const expected = {
     current_ratio:      { value: 1.1433338863, status: 'waspada', display: '1,14x' },
-    der:                { value: 0.5454397788, status: 'waspada', display: '0,55x' },
-    liability_to_asset: { value: 0.3454515852, status: 'sehat',   display: '34,5%' },
+    der:                { value: 0.5789181530, status: 'waspada', display: '0,58x' },
+    liability_to_asset: { value: 0.3666549478, status: 'sehat',   display: '36,7%' },
     roe:                { value: 0.0073868035, status: 'lemah',   display: '0,7%' },
     roa:                { value: 0.0035054491, status: 'lemah',   display: '0,4%' },
     net_margin:         { value: 0.0080371735, status: 'lemah',   display: '0,8%' },

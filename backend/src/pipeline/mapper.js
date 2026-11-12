@@ -139,6 +139,7 @@ export function mapFields(rows = [], { ticker } = {}) {
   const meta = rows._meta ?? {
     ticker: 'UNKNOWN',
     unit: 'juta IDR',
+    currency: 'IDR',
     locale: 'id-dot',
     period_end: '2026-03-31',
     period_type: 'Q1',
@@ -206,6 +207,7 @@ export function mapFields(rows = [], { ticker } = {}) {
       period_end: meta.period_end,
       period_type: meta.period_type,
       unit: meta.unit,
+      currency: meta.currency ?? 'IDR',
       locale: meta.locale,
       source: meta.source,
     },

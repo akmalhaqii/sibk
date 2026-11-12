@@ -142,18 +142,31 @@ export function detectMetadata(pages) {
   const fullText = `${pages._generalText || ''} ${stmtText}`;
   const locale = detectLocale(allItems);
 
-  let unit = 'IDR';
+  // Tahap 4-C: mata uang laporan. Urutan bukti: halaman info BEI ("Dollar Amerika / USD"),
+  // kolom "Mata Uang" ringkasan BEI, lalu kepala laporan ("dalam ribuan Dolar AS").
+  let currency = 'IDR';
+  if (
+    /Dollar\s+Amerika\s*\/\s*USD/i.test(fullText) ||
+    /Mata\s+Uang\s+USD\b/i.test(fullText) ||
+    /(dalam|in)\s+(ribuan|jutaan|thousands?|millions?|penuh|full)\s+(of\s+)?(Dolar|Dollar|US\s*Dollars?|USD|US\$)/i.test(fullText)
+  ) {
+    currency = 'USD';
+  }
+
+  let scale = '';
   if (
     /(dalam|in)\s+(jutaan|million\s*s?)/i.test(fullText) ||
     /pembulatan[^]{0,120}(jutaan|in\s+million)/i.test(fullText)
   ) {
-    unit = 'juta IDR';
+    scale = 'juta';
   } else if (
     /(dalam|in)\s+(ribuan|thousand\s*s?)/i.test(fullText) ||
     /pembulatan[^]{0,120}(ribuan|in\s+thousand)/i.test(fullText)
   ) {
-    unit = 'ribu IDR';
+    scale = 'ribu';
   }
+
+  const unit = scale ? `${scale} ${currency}` : currency;
 
   const dates = [];
   const idDateRe = /(\d{1,2})\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+(\d{4})/gi;
@@ -194,7 +207,7 @@ export function detectMetadata(pages) {
   const hasTaxonomy = /\[\d{7}\]/.test(fullText);
   const source = hasTaxonomy ? 'bei_pdf' : 'company_pdf';
 
-  return { unit, locale, period_end, period_type, source };
+  return { unit, currency, locale, period_end, period_type, source };
 }
 
 function detectColumns(rows) {

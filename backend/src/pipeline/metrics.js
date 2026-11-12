@@ -10,7 +10,8 @@
 // - Disetahunkan                        : HANYA ROE, ROA, ocf_to_assets (dan EPS/SPS di valuasi), dengan faktor dari
 //                                         entity.period_type (Q1 x4, Q2 x2, Q3 x4/3, FY x1). Rasio dalam periode yang sama
 //                                         (margin, pertumbuhan, konversi kas) TIDAK disetahunkan.
-// - DER                                 : total_liabilities / total_equity (dana syirkah temporer di luar liabilitas)
+// - Liabilitas untuk DER & L/A           : liabilitas efektif = total_liabilities + temporary_syirkah bila syirkah
+//                                         belum termasuk (definisi BEI = definisi data latih klaster). Lihat effectiveLiabilities().
 import Decimal from 'decimal.js';
 import thresholds from '../../config/thresholds.json' with { type: 'json' };
 import { fmtMultiple, fmtPct } from '../format.js';
@@ -62,12 +63,26 @@ function makeMetric(key, numVal, kind, inputs, formulaOverride) {
   return { value: numVal, display, status, formula, inputs };
 }
 
+// Tahap 4-A: samakan definisi liabilitas dengan Excel/XBRL BEI (data latih), yang memasukkan dana syirkah temporer.
+// Syirkah dianggap SUDAH termasuk bila aset = liabilitas + ekuitas (dalam toleransi pembulatan).
+export function effectiveLiabilities(fields = {}) {
+  const tl = getVal(fields, 'total_liabilities');
+  if (tl == null) return null;
+  const ts = getVal(fields, 'temporary_syirkah');
+  if (ts == null || ts === 0) return tl;
+  const ta = getVal(fields, 'total_assets');
+  const te = getVal(fields, 'total_equity');
+  const tol = thresholds.balance_tolerance ?? 1;
+  if (ta != null && te != null && Math.abs(ta - (tl + te)) <= tol) return tl;
+  return tl + ts;
+}
+
 export function computeMetrics(fields = {}, entity = {}) {
   const factor = new Decimal(annualizationFactor(entity?.period_type ?? 'Q1'));
 
   const ca = getVal(fields, 'current_assets');
   const cl = getVal(fields, 'current_liabilities');
-  const tl = getVal(fields, 'total_liabilities');
+  const tl = effectiveLiabilities(fields);
   const te = getVal(fields, 'total_equity');
   const ta = getVal(fields, 'total_assets');
   const rev = getVal(fields, 'revenue');
@@ -137,8 +152,8 @@ export function computeMetrics(fields = {}, entity = {}) {
 
   return {
     current_ratio: makeMetric('current_ratio', currentRatio, 'multiple', ['current_assets', 'current_liabilities']),
-    der: makeMetric('der', der, 'multiple', ['total_liabilities', 'total_equity']),
-    liability_to_asset: makeMetric('liability_to_asset', liabilityToAsset, 'pct', ['total_liabilities', 'total_assets']),
+    der: makeMetric('der', der, 'multiple', ['total_liabilities', 'temporary_syirkah', 'total_equity']),
+    liability_to_asset: makeMetric('liability_to_asset', liabilityToAsset, 'pct', ['total_liabilities', 'temporary_syirkah', 'total_assets']),
     roe: makeMetric('roe', roe, 'pct', ['net_income_parent', 'equity_parent'], 'net_income_parent * annual_factor / avg(equity_parent)'),
     roa: makeMetric('roa', roa, 'pct', ['net_income', 'total_assets'], 'net_income * annual_factor / avg(total_assets)'),
     net_margin: makeMetric('net_margin', netMargin, 'pct', ['net_income', 'revenue']),

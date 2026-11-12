@@ -7,11 +7,12 @@ import { fmtMultiple, fmtNumber, fmtPct, fmtRupiah } from '../format.js';
 
 export { annualizationFactor };
 
-const UNIT_FACTOR = {
-  'juta IDR': 1e6,
-  'ribu IDR': 1e3,
-  IDR: 1,
-};
+// Tahap 4-C: faktor dari skala saja ("juta"/"ribu"), mata uang dicek terpisah
+export function unitFactor(unit = '') {
+  if (/^juta\b/i.test(unit)) return 1e6;
+  if (/^ribu\b/i.test(unit)) return 1e3;
+  return 1;
+}
 
 const getVal = (fields, k) => {
   const v = fields?.[k]?.value;
@@ -26,7 +27,7 @@ const fmtMarketCap = (v) => {
 };
 
 export function computeValuation({ fields = {}, entity = {}, market = null, shares = null } = {}) {
-  const unitMul = new Decimal(UNIT_FACTOR[entity?.unit] ?? 1e6);
+  const unitMul = new Decimal(unitFactor(entity?.unit));
   const annFactor = new Decimal(annualizationFactor(entity?.period_type ?? 'Q1'));
   const isAnnualized = annFactor.gt(1);
 
@@ -180,7 +181,7 @@ export function computeValuation({ fields = {}, entity = {}, market = null, shar
     ...(pdReason ? { unavailable_reason: pdReason } : {}),
   };
 
-  return {
+  const out = {
     shares_outstanding: sharesItem,
     eps: epsItem,
     bvps: bvpsItem,
@@ -191,4 +192,15 @@ export function computeValuation({ fields = {}, entity = {}, market = null, shar
     fair_value: fairValueItem,
     premium_discount: premiumDiscountItem,
   };
+
+  // Tahap 4-C: laporan non-IDR tidak boleh dibandingkan dengan harga Rupiah (tanpa kurs)
+  const currency = entity?.currency ?? 'IDR';
+  if (currency !== 'IDR') {
+    const reason = `laporan dalam ${currency}; valuasi dengan harga Rupiah belum didukung`;
+    for (const k of Object.keys(out)) {
+      if (k === 'shares_outstanding') continue;
+      out[k] = { ...out[k], value: null, display: '—', unavailable_reason: reason };
+    }
+  }
+  return out;
 }

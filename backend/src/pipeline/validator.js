@@ -25,12 +25,16 @@ export function validate(fields = {}) {
   const ts = val(fields, 'temporary_syirkah') ?? 0; // jika tidak ada dianggap 0
   const te = val(fields, 'total_equity');
   if (ta != null && tl != null && te != null) {
-    const rhs = tl + ts + te;
+    // Tahap 4-A: syirkah bisa terpisah (PDF perusahaan) atau sudah di dalam liabilitas (BEI)
+    const sep = tl + ts + te;
+    const incl = tl + te;
+    const included = ts !== 0 && Math.abs(ta - incl) <= tol;
+    const rhs = included ? incl : sep;
     checks.push({
       name: 'balance_identity',
       lhs: ta,
       rhs,
-      terms: ['total_liabilities', 'temporary_syirkah', 'total_equity'],
+      terms: included ? ['total_liabilities', 'total_equity'] : ['total_liabilities', 'temporary_syirkah', 'total_equity'],
       pass: Math.abs(ta - rhs) <= tol,
     });
   }

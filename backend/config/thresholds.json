@@ -6,13 +6,13 @@
     "high": 2.0
   },
   "der": {
-    "formula": "total_liabilities / total_equity",
+    "formula": "(total_liabilities + temporary_syirkah) / total_equity",
     "direction": "lower_better",
     "low": 0.5,
     "high": 2.0
   },
   "liability_to_asset": {
-    "formula": "total_liabilities / total_assets",
+    "formula": "(total_liabilities + temporary_syirkah) / total_assets",
     "direction": "lower_better",
     "low": 0.4,
     "high": 0.65

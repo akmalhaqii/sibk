@@ -33,5 +33,5 @@ test('tiering: inferensi tier pada metrik SMGR dengan model produksi (backend/mo
   assert.equal(res.tier, 'mid');
   assert.equal(res.cluster, 0);
   assert.equal(res.model_version, 'tier_kmeans_v1');
-  assert.ok(Math.abs(res.distance_to_centroid - 0.6181) < 0.01);
+  assert.ok(Math.abs(res.distance_to_centroid - 0.5955) < 0.01);
 });

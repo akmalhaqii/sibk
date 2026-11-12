@@ -120,7 +120,7 @@ test(
       });
       const recompReset = await recompResetRes.json();
       assert.equal(recompReset.validation.needs_review, false);
-      assert.equal(recompReset.metrics.der.display, '0,55x');
+      assert.equal(recompReset.metrics.der.display, '0,58x');
 
       // 5. Isi harga manual Rp3.000 -> PER, PBV, dan premium muncul; narasi ikut berubah
       const recompPriceRes = await fetch(`${baseUrl}/api/recompute`, {
