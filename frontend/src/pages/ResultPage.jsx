@@ -1,7 +1,7 @@
 // FR-UI-03 / FR-UI-04 / FR-UI-02 (needs_review): metrik, tier, valuasi, narasi, tabel koreksi.
 // R-11: simpan hasil ke sessionStorage supaya halaman tidak kosong saat di-refresh waktu demo.
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { recompute } from '../api/client.js';
 import ValidationBadge from '../components/ValidationBadge.jsx';
 import MetricCard from '../components/MetricCard.jsx';
@@ -49,6 +49,7 @@ const METRIC_GROUPS = [
 
 export default function ResultPage() {
   const { state } = useLocation();
+  const navigate = useNavigate();
 
   const [result, setResult] = useState(() => {
     if (state?.result) return state.result;
@@ -84,19 +85,16 @@ export default function ResultPage() {
   const [recomputeError, setRecomputeError] = useState(null);
 
   useEffect(() => {
-    if (state?.result) {
-      setResult(state.result);
-      try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state.result));
-      } catch {}
-      if (state?.initialResult) {
-        setInitialResult(state.initialResult);
-        try {
-          sessionStorage.setItem(INITIAL_STORAGE_KEY, JSON.stringify(state.initialResult));
-        } catch {}
-      }
-    }
-  }, [state?.result, state?.initialResult]);
+    if (!state?.result) return;
+    setResult(state.result);
+    setInitialResult(state.initialResult ?? state.result);
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state.result));
+      sessionStorage.setItem(INITIAL_STORAGE_KEY, JSON.stringify(state.initialResult ?? state.result));
+    } catch {}
+    // REV-01: hapus state dari history agar refresh membaca sessionStorage
+    navigate('.', { replace: true, state: null });
+  }, [state?.result, state?.initialResult, navigate]);
 
   function saveResult(next) {
     setResult(next);
@@ -115,7 +113,7 @@ export default function ResultPage() {
         fields: nextFields,
         ticker: result.entity.ticker,
         shares: sharesInput ?? null,
-        price: result.market?.source === 'manual' ? result.market.price : (result.market?.price ?? null),
+        market: result.market ?? null, // REV-02: pertahankan sumber & waktu harga
       });
       saveResult(next);
     } catch (err) {
@@ -155,7 +153,7 @@ export default function ResultPage() {
         fields: structuredClone(initialResult.fields),
         ticker: initialResult.entity.ticker,
         shares: sharesInput ?? null,
-        price: result.market?.source === 'manual' ? result.market.price : (initialResult.market?.price ?? null),
+        market: result.market ?? null, // REV-02: pertahankan sumber & waktu harga
       });
       saveResult(next);
     } catch (err) {

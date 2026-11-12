@@ -35,6 +35,34 @@ test('e2e API: unggah berkas bukan PDF mengembalikan 400 "Berkas harus PDF"', as
   });
 });
 
+test('REV-02: recompute dengan market yahoo-finance2 mempertahankan source dan fetched_at', async () => {
+  await withServer(async (baseUrl) => {
+    const mockAnalyze = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '../../frontend/src/mock/analyze.json'), 'utf8')
+    );
+    const prevMarket = {
+      price: 3150,
+      currency: 'IDR',
+      fetched_at: '2026-11-12T04:55:00.000Z',
+      source: 'yahoo-finance2',
+    };
+
+    const res = await fetch(`${baseUrl}/api/recompute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        entity: mockAnalyze.entity,
+        fields: mockAnalyze.fields,
+        ticker: 'SMGR',
+        market: prevMarket,
+      }),
+    });
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.deepEqual(body.market, prevMarket);
+  });
+});
+
 test(
   'e2e API: alur lengkap analyze SMGR -> buka PDF -> koreksi total_equity -> batalkan -> harga manual -> narasi',
   { skip: !fs.existsSync(smgrPdfPath) },

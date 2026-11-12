@@ -29,7 +29,7 @@ export async function runPipeline({ file, ticker, shares }) {
   return result;
 }
 
-export async function recompute({ entity, fields, shares, ticker, price }) {
+export async function recompute({ entity, fields, shares, ticker, price, market: prevMarket }) {
   const validation = validate(fields); // R-02: selalu hitung ulang validasi dari fields terkini
   const metrics = computeMetrics(fields, entity);
   const tiering = assignTier(metrics);
@@ -37,9 +37,11 @@ export async function recompute({ entity, fields, shares, ticker, price }) {
   const market =
     price != null
       ? { price: Number(price), currency: 'IDR', fetched_at: new Date().toISOString(), source: 'manual' }
-      : resolvedTicker
-        ? await fetchPrice(resolvedTicker).catch(() => null)
-        : null;
+      : prevMarket !== undefined
+        ? prevMarket
+        : resolvedTicker
+          ? await fetchPrice(resolvedTicker).catch(() => null)
+          : null;
   const valuation = computeValuation({ fields, entity, market, shares });
   return { entity, fields, validation, metrics, tiering, market, valuation };
 }
