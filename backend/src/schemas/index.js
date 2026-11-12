@@ -137,6 +137,11 @@ export const ChatSessionCreate = z.union([
     origin: z.string().optional(),
   }),
   z.object({
+    file_id: z.string().trim().min(1),
+    mode: z.literal('analysis').optional(),
+    origin: z.string().optional(),
+  }),
+  z.object({
     mode: z.enum(['glossary_only', 'free']),
     origin: z.string().optional(),
   }),

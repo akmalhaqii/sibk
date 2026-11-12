@@ -12,6 +12,7 @@ import {
   updateSession,
 } from '../chat/sessions.js';
 import { answerQuestion } from '../chat/service.js';
+import { getAnalysisByFileId } from '../chat/analyses.js';
 
 const router = Router();
 
@@ -39,7 +40,15 @@ router.post('/sessions', async (req, res, next) => {
     return res.status(400).json({ error: 'Mode tanya bebas belum tersedia pada Tahap 1.' });
   }
   try {
-    const { session, created } = await createSession(body);
+    let payload = body;
+    if (body.file_id && !body.result) {
+      const cached = await getAnalysisByFileId(body.file_id);
+      if (!cached) {
+        return res.status(404).json({ error: 'Hasil analisis tidak ditemukan di cache.' });
+      }
+      payload = { result: cached, mode: body.mode, origin: body.origin || 'chatbot' };
+    }
+    const { session, created } = await createSession(payload);
     return res.status(created ? 201 : 200).json(session);
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.message });

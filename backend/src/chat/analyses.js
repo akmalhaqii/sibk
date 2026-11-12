@@ -55,3 +55,28 @@ export async function listAnalyses({ all = false } = {}) {
   }
   return deduped;
 }
+
+export async function getAnalysisByFileId(fileId) {
+  if (!fileId || typeof fileId !== 'string') return null;
+  const dir = getCacheDir();
+  let entries = [];
+  try {
+    entries = await fs.readdir(dir);
+  } catch {
+    return null;
+  }
+  for (const name of entries) {
+    if (!name.startsWith('analyze_') || !name.endsWith('.json')) continue;
+    const fp = path.join(dir, name);
+    try {
+      const data = JSON.parse(await fs.readFile(fp, 'utf8'));
+      const inferred = name.replace(/^analyze_[^_]+_/, '').replace(/\.json$/, '');
+      if (data?.entity?.file_id === fileId || inferred === fileId) {
+        return data;
+      }
+    } catch {
+      // Lewati file cache rusak
+    }
+  }
+  return null;
+}

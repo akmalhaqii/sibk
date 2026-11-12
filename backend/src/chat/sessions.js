@@ -140,7 +140,7 @@ export async function findByFileId(fileId) {
 export async function createSession({ result, mode, origin } = {}) {
   if (result) {
     const fileId = result.entity?.file_id ?? null;
-    if (fileId) {
+    if (fileId && origin !== 'chatbot') {
       const existing = await findByFileId(fileId);
       if (existing) return { session: existing, created: false };
     }
