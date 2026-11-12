@@ -10,6 +10,11 @@ import ValuationCard from '../components/ValuationCard.jsx';
 import ExtractionTable from '../components/ExtractionTable.jsx';
 import NarrativePanel from '../components/NarrativePanel.jsx';
 import ReportActions from '../components/ReportActions.jsx';
+import SummaryRow from '../components/SummaryRow.jsx';
+import AssistantLauncher from '../components/AssistantLauncher.jsx';
+import MiniChatCard from '../components/MiniChatCard.jsx';
+import { useFeatures } from '../hooks/useFeatures.js';
+import { useChatSession } from '../hooks/useChatSession.js';
 import mockResult from '../mock/analyze.json';
 
 const STORAGE_KEY = 'telusurfin:last_result';
@@ -88,8 +93,20 @@ export default function ResultPage() {
   });
 
   const [narrativeData, setNarrativeData] = useState(null); // FR-OUT-01
+  const [narrativeFinished, setNarrativeFinished] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [recomputing, setRecomputing] = useState(false);
   const [recomputeError, setRecomputeError] = useState(null);
+
+  const { features } = useFeatures();
+  const chat = useChatSession({
+    result,
+    enabled: Boolean(features.chat && narrativeFinished && result),
+  });
+
+  useEffect(() => {
+    setChatOpen(false);
+  }, [result?.entity?.file_id]);
 
   useEffect(() => {
     if (!state?.result) return;
@@ -171,7 +188,35 @@ export default function ResultPage() {
   }
 
   if (!result) {
-    return (
+    const showChatLauncher = Boolean(features.chat && narrativeFinished);
+
+  function handleOpenChat() {
+    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
+    if (isNarrow && features.chat_page && chat.session?.id) {
+      navigate(`/chatbot/${chat.session.id}`);
+      return;
+    }
+    setChatOpen(true);
+  }
+
+  function handleAskSample(questionText) {
+    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
+    if (isNarrow && features.chat_page && chat.session?.id) {
+      chat.send(questionText);
+      navigate(`/chatbot/${chat.session.id}`);
+      return;
+    }
+    setChatOpen(true);
+    chat.send(questionText);
+  }
+
+  function handleExpandChat() {
+    if (chat.session?.id) {
+      navigate(`/chatbot/${chat.session.id}`);
+    }
+  }
+
+  return (
       <main className="page-container empty-state card">
         <h1>Belum ada hasil analisis</h1>
         <p>Unggah laporan keuangan PDF terlebih dahulu untuk melihat hasil analisis.</p>
@@ -184,6 +229,34 @@ export default function ResultPage() {
 
   const { entity, validation, metrics, tiering, market, valuation } = result;
   const isQuarterly = ['Q1', 'Q2', 'Q3', '9M', 'H1'].includes(entity?.period_type);
+
+  const showChatLauncher = Boolean(features.chat && narrativeFinished);
+
+  function handleOpenChat() {
+    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
+    if (isNarrow && features.chat_page && chat.session?.id) {
+      navigate(`/chatbot/${chat.session.id}`);
+      return;
+    }
+    setChatOpen(true);
+  }
+
+  function handleAskSample(questionText) {
+    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
+    if (isNarrow && features.chat_page && chat.session?.id) {
+      chat.send(questionText);
+      navigate(`/chatbot/${chat.session.id}`);
+      return;
+    }
+    setChatOpen(true);
+    chat.send(questionText);
+  }
+
+  function handleExpandChat() {
+    if (chat.session?.id) {
+      navigate(`/chatbot/${chat.session.id}`);
+    }
+  }
 
   return (
     <main className="page-container result-page">
@@ -223,8 +296,42 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* Ringkasan Narasi */}
-      <NarrativePanel result={result} onLoaded={setNarrativeData} />
+      {/* Ringkasan Narasi + Kartu Chat Mini (C4) */}
+      <SummaryRow
+        chatOpen={Boolean(features.chat && chatOpen)}
+        summary={
+          <>
+            <NarrativePanel
+              result={result}
+              onLoaded={setNarrativeData}
+              onFinished={setNarrativeFinished}
+            />
+            {showChatLauncher && !chatOpen && (
+              <AssistantLauncher
+                tier={tiering?.tier}
+                onOpen={handleOpenChat}
+                onAskSample={handleAskSample}
+                disabled={chat.loadingSession}
+              />
+            )}
+          </>
+        }
+        chatSlot={
+          <MiniChatCard
+            session={chat.session}
+            messages={chat.messages}
+            streaming={chat.streaming}
+            streamingSentences={chat.streamingSentences}
+            droppedLive={chat.droppedLive}
+            busyNotice={chat.busyNotice}
+            error={chat.error}
+            onSend={chat.send}
+            onClose={() => setChatOpen(false)}
+            onExpand={handleExpandChat}
+            canExpand={Boolean(features.chat_page)}
+          />
+        }
+      />
 
       {/* Grid Dua Kolom: Metrik (Kiri) & Tier + Valuasi (Kanan) */}
       <div className="dashboard-grid">

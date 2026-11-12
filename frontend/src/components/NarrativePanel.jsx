@@ -23,7 +23,7 @@ function cleanPlainText(raw = '') {
     .join('\n\n');
 }
 
-export default function NarrativePanel({ result, onLoaded }) {
+export default function NarrativePanel({ result, onLoaded, onFinished }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -36,6 +36,7 @@ export default function NarrativePanel({ result, onLoaded }) {
     setError(null);
     setData(null);
     onLoaded?.(null);
+    onFinished?.(false);
 
     // Narasi v5: satu panggilan; selama menunggu hanya status "Qwen sedang menulis…" yang tampil
     narrative(result, { signal: controller.signal })
@@ -48,7 +49,10 @@ export default function NarrativePanel({ result, onLoaded }) {
         if (!cancelled && err.name !== 'AbortError') setError(err.message);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          onFinished?.(true);
+        }
       });
 
     return () => {
