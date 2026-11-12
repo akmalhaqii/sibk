@@ -1,0 +1,110 @@
+.ExtractionTable {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.ExtractionTable .extraction-header {
+  align-items: center;
+  gap: 16px 24px;
+  margin-bottom: 20px;
+}
+
+.ExtractionTable .extraction-header > div:first-child {
+  flex: 1 1 330px;
+}
+
+.ExtractionTable .extraction-header h2 {
+  color: var(--ink);
+  font: 700 1.35rem/1.2 var(--heading-font);
+}
+
+.ExtractionTable .section-subtitle {
+  max-width: 66ch;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.ExtractionTable .section-subtitle code {
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.ExtractionTable .table-responsive {
+  max-width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+.ExtractionTable .table-responsive:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.ExtractionTable .data-table {
+  min-width: 720px;
+  table-layout: fixed;
+  font-size: .875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.extraction-col-label { width: 30%; }
+.extraction-col-value { width: 19%; }
+.extraction-col-prior { width: 17%; }
+.extraction-col-page { width: 10%; }
+.extraction-col-confidence, .extraction-col-status { width: 12%; }
+
+.ExtractionTable .data-table :is(th, td) {
+  padding: 10px clamp(9px, 1cqw, 16px);
+}
+
+.ExtractionTable .data-table thead th {
+  background: var(--navy);
+  color: var(--surface);
+  font-size: .8125rem;
+}
+
+.ExtractionTable .data-table tbody th {
+  background: transparent;
+  color: var(--ink);
+  font-size: inherit;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ExtractionTable .data-table tbody tr:nth-child(even):not(.row-dirty, .row-corrected) {
+  background: #f8f6f0;
+}
+
+.ExtractionTable .data-table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.ExtractionTable .pos-key {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.ExtractionTable .cell-input {
+  width: min(100%, 150px);
+  padding: 7px 9px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-variant-numeric: inherit;
+}
+
+.ExtractionTable .cell-input.input-invalid {
+  background: #fef2f2;
+}
+
+.extraction-scroll-hint {
+  display: none;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: .8125rem;
+}
+
+@container (width < 722px) {
+  .extraction-scroll-hint { display: block; }
+}

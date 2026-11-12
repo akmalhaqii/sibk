@@ -47,8 +47,29 @@ const METRIC_GROUPS = [
   },
 ];
 
-export default function ResultPage() {
-  const { state } = useLocation();
+const SUMMARY_METRICS = [
+  { key: 'roe', label: 'Imbal hasil atas ekuitas (ROE)' },
+  { key: 'current_ratio', label: 'Rasio lancar' },
+  { key: 'der', label: 'Liabilitas terhadap ekuitas (DER)' },
+];
+
+const periodFormatter = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long', timeZone: 'UTC' });
+
+function ResultView({ id, activeSection, title, description, children }) {
+  const headingId = `${id}-heading`;
+  return (
+    <section className="result-view" id={id} aria-labelledby={headingId} hidden={activeSection !== id}>
+      <header className="result-view-heading">
+        <h1 id={headingId} tabIndex={-1}>{title}</h1>
+        <p>{description}</p>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+export default function ResultPage({ activeSection }) {
+  const { state, pathname, search, hash } = useLocation();
   const navigate = useNavigate();
 
   const [result, setResult] = useState(() => {
@@ -93,8 +114,8 @@ export default function ResultPage() {
       sessionStorage.setItem(INITIAL_STORAGE_KEY, JSON.stringify(state.initialResult ?? state.result));
     } catch {}
     // REV-01: hapus state dari history agar refresh membaca sessionStorage
-    navigate('.', { replace: true, state: null });
-  }, [state?.result, state?.initialResult, navigate]);
+    navigate({ pathname, search, hash }, { replace: true, state: null });
+  }, [state?.result, state?.initialResult, pathname, search, hash, navigate]);
 
   function saveResult(next) {
     setResult(next);
@@ -165,7 +186,7 @@ export default function ResultPage() {
 
   if (!result) {
     return (
-      <main className="page-container empty-state card">
+      <main id="main-content" className="page-container empty-state card" tabIndex={-1}>
         <h1>Belum ada hasil analisis</h1>
         <p>Unggah laporan keuangan PDF terlebih dahulu untuk melihat hasil analisis.</p>
         <Link to="/" className="btn-primary">
@@ -177,37 +198,31 @@ export default function ResultPage() {
 
   const { entity, validation, metrics, tiering, market, valuation } = result;
   const isQuarterly = ['Q1', 'Q2', 'Q3', '9M', 'H1'].includes(entity?.period_type);
+  const periodDate = Date.parse(entity?.period_end);
+  const periodLabel = Number.isFinite(periodDate) ? periodFormatter.format(periodDate) : entity?.period_end;
 
   return (
-    <main className="page-container result-page">
-      {/* Kepala Hasil */}
+    <main id="main-content" className="page-container result-page" tabIndex={-1}>
       <header className="result-header card">
         <div className="result-title-group">
-          <div className="result-topline">
-            <Link to="/" className="back-link">
-              ← Unggah Laporan Baru
-            </Link>
-            {entity?.file_url && (
-              <a
-                href={entity.file_url}
-                target="_blank"
-                rel="noreferrer"
-                className="pdf-source-link"
-              >
-                Buka PDF Sumber ↗
-              </a>
-            )}
-          </div>
-
           <div className="entity-summary">
-            <h1 className="ticker-heading">{entity?.ticker || 'EMITEN'}</h1>
+            <span className="ticker-heading">{entity?.ticker || 'Emiten'}</span>
             {entity?.period_type && <span className="period-badge">{entity.period_type}</span>}
-            {entity?.period_end && <span className="meta-pill">Periode: {entity.period_end}</span>}
-            {entity?.unit && <span className="meta-pill">Satuan: {entity.unit}</span>}
+          </div>
+          <div className="result-context-meta">
+            {periodLabel && <span>Periode berakhir <time dateTime={entity.period_end}>{periodLabel}</time></span>}
+            {entity?.unit && <span>Satuan laporan <strong>{entity.unit}</strong></span>}
           </div>
         </div>
 
-        <ValidationBadge validation={validation} />
+        <div className="result-context-actions">
+          <ValidationBadge validation={validation} />
+          {entity?.file_url && (
+            <a href={entity.file_url} target="_blank" rel="noreferrer" className="pdf-source-link">
+              Buka PDF sumber <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </div>
       </header>
 
       {recomputeError && (
@@ -216,57 +231,98 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* Ringkasan Narasi */}
-      <NarrativePanel result={result} />
-
-      {/* Grid Dua Kolom: Metrik (Kiri) & Tier + Valuasi (Kanan) */}
-      <div className="dashboard-grid">
-        <section className="metrics-column card">
-          <div className="section-header">
-            <h2>Rasio Kesehatan Keuangan</h2>
-            {isQuarterly && (
-              <span className="meta-note">* Rasio berbasis laba/arus kas disetahunkan dari periode {entity.period_type}</span>
-            )}
-          </div>
-
-          <div className="metric-groups">
-            {METRIC_GROUPS.map((group) => (
-              <div key={group.title} className="metric-group">
-                <h3 className="metric-group-title">{group.title}</h3>
-                <div className="metric-cards-grid">
-                  {group.items.map((item) => (
-                    <MetricCard
-                      key={item.key}
-                      label={item.label}
-                      metric={metrics?.[item.key]}
-                      annualized={item.annualizedQuarterly && isQuarterly}
-                    />
-                  ))}
+      <ResultView
+        id="ringkasan"
+        activeSection={activeSection}
+        title="Ringkasan"
+        description="Gambaran umum kondisi keuangan dari laporan yang kamu unggah."
+      >
+        {validation?.needs_review && (
+          <p className="result-review-link">
+            <Link to="#data-ekstraksi">Periksa angka di Data Ekstraksi <span aria-hidden="true">→</span></Link>
+          </p>
+        )}
+        <div className="result-summary-grid">
+          <NarrativePanel result={result} />
+          <section className="summary-figures" aria-labelledby="summary-figures-heading">
+            <h2 id="summary-figures-heading">Angka utama</h2>
+            <dl>
+              {SUMMARY_METRICS.map(({ key, label }) => (
+                <div key={key}>
+                  <dt>{label}</dt>
+                  <dd>{metrics?.[key]?.display ?? '—'}</dd>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="side-column">
-          <TierCard tiering={tiering} />
-          <ValuationCard
-            valuation={valuation}
-            market={market}
-            isQuarterly={isQuarterly}
-            onApplyPrice={handleApplyPrice}
-            loading={recomputing}
-          />
+              ))}
+            </dl>
+            <Link to="#rasio">Lihat Rasio &amp; Tier <span aria-hidden="true">→</span></Link>
+          </section>
         </div>
-      </div>
+      </ResultView>
 
-      {/* Tabel Ekstraksi & Koreksi */}
-      <ExtractionTable
-        result={result}
-        onRecompute={handleRecomputeFields}
-        onReset={handleResetFields}
-        loading={recomputing}
-      />
+      <ResultView
+        id="rasio"
+        activeSection={activeSection}
+        title="Rasio & Tier"
+        description="Baca rasio per kelompok dan lihat posisi emiten dalam klaster."
+      >
+        <div className="result-ratio-grid">
+          <section className="metrics-column card">
+            <div className="section-header">
+              <h2>Rasio kesehatan keuangan</h2>
+              {isQuarterly && (
+                <p className="meta-note">* Rasio bertanda bintang disetahunkan dari periode {entity.period_type}.</p>
+              )}
+            </div>
+            <div className="metric-groups">
+              {METRIC_GROUPS.map((group) => (
+                <div key={group.title} className="metric-group">
+                  <h3 className="metric-group-title">{group.title}</h3>
+                  <div className="metric-cards-grid">
+                    {group.items.map((item) => (
+                      <MetricCard
+                        key={item.key}
+                        label={item.label}
+                        metric={metrics?.[item.key]}
+                        annualized={item.annualizedQuarterly && isQuarterly}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          <TierCard tiering={tiering} />
+        </div>
+      </ResultView>
+
+      <ResultView
+        id="valuasi"
+        activeSection={activeSection}
+        title="Valuasi"
+        description="Bandingkan harga saham dengan laba, nilai buku, dan penjualan perusahaan."
+      >
+        <ValuationCard
+          valuation={valuation}
+          market={market}
+          isQuarterly={isQuarterly}
+          onApplyPrice={handleApplyPrice}
+          loading={recomputing}
+        />
+      </ResultView>
+
+      <ResultView
+        id="data-ekstraksi"
+        activeSection={activeSection}
+        title="Data Ekstraksi"
+        description="Telusuri angka ke halaman PDF sumber dan koreksi angka jika diperlukan."
+      >
+        <ExtractionTable
+          result={result}
+          onRecompute={handleRecomputeFields}
+          onReset={handleResetFields}
+          loading={recomputing}
+        />
+      </ResultView>
     </main>
   );
 }
