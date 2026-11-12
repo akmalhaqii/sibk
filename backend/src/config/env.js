@@ -43,4 +43,11 @@ export default {
     numPredict: Number(process.env.OLLAMA_NUM_PREDICT || 400), // REV-06
   },
   promptVersion: process.env.PROMPT_VERSION || 'narrative_v6',
+  // Saklar fitur chatbot (rollback tanpa ganti kode): false = fitur disembunyikan & API chat nonaktif
+  chat: {
+    enabled: process.env.CHAT_ENABLED !== 'false',
+    pageEnabled: process.env.CHAT_PAGE_ENABLED !== 'false',
+    model: process.env.OLLAMA_CHAT_MODEL || process.env.OLLAMA_MODEL || 'qwen3:1.7b',
+    financeModel: process.env.OLLAMA_FINANCE_MODEL || '',
+  },
 };

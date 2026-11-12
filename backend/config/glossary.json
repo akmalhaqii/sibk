@@ -4,7 +4,12 @@
   "entries": [
     {
       "term": "Nilai wajar Graham",
-      "aliases": ["graham number", "nilai wajar", "fair value graham", "graham"],
+      "aliases": [
+        "graham number",
+        "nilai wajar",
+        "fair value graham",
+        "graham"
+      ],
       "metric_key": "fair_value",
       "definisi": "Estimasi nilai wajar konservatif per saham dari laporan keuangan, dikembangkan Benjamin Graham untuk investor defensif.",
       "rumus": "√(22,5 × EPS × BVPS)",
@@ -12,7 +17,12 @@
     },
     {
       "term": "Target harga analis",
-      "aliases": ["target harga", "target price", "konsensus analis", "price target"],
+      "aliases": [
+        "target harga",
+        "target price",
+        "konsensus analis",
+        "price target"
+      ],
       "metric_key": null,
       "definisi": "Perkiraan harga saham 12 bulan ke depan dari analis sekuritas, biasanya dirata-ratakan menjadi konsensus.",
       "rumus": null,
@@ -20,7 +30,12 @@
     },
     {
       "term": "Liabilitas terhadap ekuitas",
-      "aliases": ["der", "debt to equity", "rasio utang terhadap ekuitas", "liabilitas/ekuitas"],
+      "aliases": [
+        "der",
+        "debt to equity",
+        "rasio utang terhadap ekuitas",
+        "liabilitas/ekuitas"
+      ],
       "metric_key": "der",
       "definisi": "Perbandingan seluruh kewajiban perusahaan terhadap ekuitasnya; makin rendah makin longgar struktur permodalannya.",
       "rumus": "(total liabilitas + dana syirkah temporer) ÷ total ekuitas",
@@ -28,7 +43,11 @@
     },
     {
       "term": "Disetahunkan",
-      "aliases": ["annualisasi", "annualized", "disetahunkan"],
+      "aliases": [
+        "annualisasi",
+        "annualized",
+        "disetahunkan"
+      ],
       "metric_key": null,
       "definisi": "Mengubah angka satu periode menjadi setara satu tahun agar bisa dibandingkan dengan ambang tahunan.",
       "rumus": "angka kuartal Q1 × 4",
@@ -36,7 +55,11 @@
     },
     {
       "term": "Laba 12 bulan terakhir (TTM)",
-      "aliases": ["ttm", "trailing twelve months", "laba 12 bulan terakhir"],
+      "aliases": [
+        "ttm",
+        "trailing twelve months",
+        "laba 12 bulan terakhir"
+      ],
       "metric_key": null,
       "definisi": "Jumlah laba empat kuartal terakhir yang benar-benar terjadi.",
       "rumus": "laba tahun lalu + laba kuartal berjalan − laba kuartal yang sama tahun lalu",
@@ -44,7 +67,12 @@
     },
     {
       "term": "Saham treasuri",
-      "aliases": ["treasury stock", "saham yang diperoleh kembali", "buyback", "treasuri"],
+      "aliases": [
+        "treasury stock",
+        "saham yang diperoleh kembali",
+        "buyback",
+        "treasuri"
+      ],
       "metric_key": null,
       "definisi": "Saham emiten yang dibeli kembali oleh emiten itu sendiri dan tidak beredar di publik.",
       "rumus": null,
@@ -52,7 +80,11 @@
     },
     {
       "term": "PER",
-      "aliases": ["price to earnings", "p/e", "per"],
+      "aliases": [
+        "price to earnings",
+        "p/e",
+        "per"
+      ],
       "metric_key": "per",
       "definisi": "Harga saham dibagi laba per saham; menunjukkan berapa kali laba setahun dibayar investor.",
       "rumus": "harga ÷ EPS",
@@ -60,11 +92,204 @@
     },
     {
       "term": "PBV",
-      "aliases": ["price to book", "p/b", "pbv"],
+      "aliases": [
+        "price to book",
+        "p/b",
+        "pbv"
+      ],
       "metric_key": "pbv",
       "definisi": "Harga saham dibagi nilai buku per saham.",
       "rumus": "harga ÷ BVPS",
       "catatan_proyek": "BVPS memakai ekuitas yang dapat diatribusikan kepada pemilik entitas induk."
+    },
+    {
+      "term": "ROE",
+      "aliases": [
+        "roe",
+        "return on equity",
+        "imbal hasil ekuitas",
+        "tingkat pengembalian ekuitas"
+      ],
+      "metric_key": "roe",
+      "definisi": "Mengukur seberapa besar laba yang dihasilkan dari modal pemilik.",
+      "rumus": "laba pemilik entitas induk ÷ rata-rata ekuitas pemilik entitas induk",
+      "catatan_proyek": "Pada laporan kuartalan, laba disetahunkan (× 4). Rata-rata ekuitas memakai saldo awal dan akhir periode."
+    },
+    {
+      "term": "ROA",
+      "aliases": [
+        "roa",
+        "return on assets",
+        "return on asset",
+        "imbal hasil aset"
+      ],
+      "metric_key": "roa",
+      "definisi": "Mengukur seberapa efisien aset perusahaan menghasilkan laba.",
+      "rumus": "laba bersih ÷ rata-rata total aset",
+      "catatan_proyek": "Pada laporan kuartalan, laba disetahunkan (× 4)."
+    },
+    {
+      "term": "Margin laba bersih",
+      "aliases": [
+        "net margin",
+        "net profit margin",
+        "margin bersih",
+        "margin laba bersih"
+      ],
+      "metric_key": "net_margin",
+      "definisi": "Bagian pendapatan yang tersisa sebagai laba bersih.",
+      "rumus": "laba bersih ÷ pendapatan",
+      "catatan_proyek": "-"
+    },
+    {
+      "term": "Margin usaha",
+      "aliases": [
+        "operating margin",
+        "margin operasi",
+        "margin operasional",
+        "margin usaha"
+      ],
+      "metric_key": "operating_margin",
+      "definisi": "Bagian pendapatan yang tersisa sebagai laba usaha, sebelum beban keuangan dan pajak.",
+      "rumus": "laba usaha ÷ pendapatan",
+      "catatan_proyek": "Tidak semua laporan menyajikan baris laba usaha; bila tidak ada, metrik ini kosong."
+    },
+    {
+      "term": "Current ratio",
+      "aliases": [
+        "current ratio",
+        "rasio lancar",
+        "rasio likuiditas"
+      ],
+      "metric_key": "current_ratio",
+      "definisi": "Kemampuan aset lancar menutup liabilitas jangka pendek.",
+      "rumus": "aset lancar ÷ liabilitas jangka pendek",
+      "catatan_proyek": "-"
+    },
+    {
+      "term": "Liabilitas terhadap aset",
+      "aliases": [
+        "liabilitas terhadap aset",
+        "debt to asset",
+        "utang terhadap aset",
+        "l/a"
+      ],
+      "metric_key": "liability_to_asset",
+      "definisi": "Porsi aset yang dibiayai oleh kewajiban.",
+      "rumus": "(total liabilitas + dana syirkah temporer) ÷ total aset",
+      "catatan_proyek": "-"
+    },
+    {
+      "term": "Pertumbuhan pendapatan",
+      "aliases": [
+        "pertumbuhan pendapatan",
+        "revenue growth",
+        "pertumbuhan penjualan"
+      ],
+      "metric_key": "revenue_growth",
+      "definisi": "Perubahan pendapatan dibanding periode yang sama tahun lalu.",
+      "rumus": "pendapatan periode ini ÷ pendapatan periode yang sama tahun lalu − 1",
+      "catatan_proyek": "-"
+    },
+    {
+      "term": "Pertumbuhan laba",
+      "aliases": [
+        "pertumbuhan laba",
+        "earnings growth",
+        "pertumbuhan laba bersih"
+      ],
+      "metric_key": "earnings_growth",
+      "definisi": "Perubahan laba pemilik entitas induk dibanding periode yang sama tahun lalu.",
+      "rumus": "laba pemilik entitas induk periode ini ÷ periode yang sama tahun lalu − 1",
+      "catatan_proyek": "-"
+    },
+    {
+      "term": "Konversi kas",
+      "aliases": [
+        "konversi kas",
+        "cash conversion",
+        "arus kas operasi terhadap laba bersih"
+      ],
+      "metric_key": "cash_conversion",
+      "definisi": "Seberapa besar laba bersih benar-benar menjadi kas dari operasi.",
+      "rumus": "arus kas operasi ÷ laba bersih",
+      "catatan_proyek": "Nilai di atas 1x berarti kas operasi lebih besar dari laba bersih."
+    },
+    {
+      "term": "Arus kas operasi terhadap aset",
+      "aliases": [
+        "arus kas operasi terhadap aset",
+        "ocf to assets",
+        "arus kas terhadap aset"
+      ],
+      "metric_key": "ocf_to_assets",
+      "definisi": "Kas dari operasi yang dihasilkan per rupiah aset.",
+      "rumus": "arus kas operasi ÷ rata-rata total aset",
+      "catatan_proyek": "Disetahunkan pada laporan kuartalan. Dipakai sebagai fitur model klaster dan tidak punya status sehat/waspada/lemah."
+    },
+    {
+      "term": "Tier performa",
+      "aliases": [
+        "tier",
+        "klaster",
+        "kategori",
+        "tier performa",
+        "model klaster",
+        "kmeans",
+        "k-means"
+      ],
+      "metric_key": null,
+      "definisi": "Kelompok kinerja (low, mid, high) dari model klaster K-Means yang dilatih pada emiten non-keuangan BEI periode Q1 2025.",
+      "rumus": "model tier_kmeans_v1 dengan 7 fitur: ROA, ROE, liabilitas terhadap aset, margin laba bersih, current ratio, pertumbuhan pendapatan, arus kas operasi terhadap aset",
+      "catatan_proyek": "Tier bersifat relatif terhadap emiten pembanding, bukan penilaian mutlak dan bukan saran investasi."
+    },
+    {
+      "term": "EPS",
+      "aliases": [
+        "eps",
+        "laba per saham",
+        "earnings per share"
+      ],
+      "metric_key": "eps",
+      "definisi": "Laba pemilik entitas induk per lembar saham.",
+      "rumus": "laba pemilik entitas induk ÷ jumlah saham",
+      "catatan_proyek": "Disetahunkan pada laporan kuartalan; jumlah saham belum dikurangi saham treasuri."
+    },
+    {
+      "term": "BVPS",
+      "aliases": [
+        "bvps",
+        "nilai buku per saham",
+        "book value per share"
+      ],
+      "metric_key": "bvps",
+      "definisi": "Ekuitas pemilik entitas induk per lembar saham.",
+      "rumus": "ekuitas pemilik entitas induk ÷ jumlah saham",
+      "catatan_proyek": "-"
+    },
+    {
+      "term": "P/S",
+      "aliases": [
+        "p/s",
+        "price to sales",
+        "ps ratio"
+      ],
+      "metric_key": "ps",
+      "definisi": "Harga saham dibanding pendapatan per saham.",
+      "rumus": "harga ÷ (pendapatan ÷ jumlah saham)",
+      "catatan_proyek": "Pendapatan disetahunkan pada laporan kuartalan."
+    },
+    {
+      "term": "Dana syirkah temporer",
+      "aliases": [
+        "dana syirkah temporer",
+        "syirkah temporer",
+        "temporary syirkah"
+      ],
+      "metric_key": null,
+      "definisi": "Dana pihak ketiga berbasis akad syariah yang disajikan di antara liabilitas dan ekuitas.",
+      "rumus": null,
+      "catatan_proyek": "TelusurFin memasukkannya ke liabilitas saat menghitung liabilitas terhadap ekuitas dan liabilitas terhadap aset, mengikuti definisi data BEI yang dipakai melatih model klaster."
     }
   ]
 }
