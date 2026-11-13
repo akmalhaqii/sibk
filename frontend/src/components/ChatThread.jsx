@@ -23,6 +23,17 @@ const METRIC_LABELS = {
   total_assets: 'Total Aset',
   total_liabilities: 'Total Liabilitas',
   total_equity: 'Total Ekuitas',
+  net_margin: 'Margin Laba Bersih',
+  liability_to_asset: 'Liabilitas/Aset',
+  cash_conversion: 'Arus Kas Operasi/Laba',
+  revenue_growth: 'Pertumbuhan Pendapatan',
+  earnings_growth: 'Pertumbuhan Laba',
+  gross_profit: 'Laba Bruto',
+  profit_before_tax: 'Laba Sebelum Pajak',
+  current_assets: 'Aset Lancar',
+  current_liabilities: 'Liabilitas Jangka Pendek',
+  cash: 'Kas dan Setara Kas',
+  operating_cash_flow: 'Arus Kas Operasi',
 };
 
 function formatRefChip(ref, fileId, fileUrl) {
@@ -35,13 +46,20 @@ function formatRefChip(ref, fileId, fileUrl) {
       </span>
     );
   }
-  return pages.map((page) => (
-    <span key={`${ref.key}_${page}`} className="chat-ref-chip">
-      <SourcePageLink fileId={fileId} fileUrl={fileUrl} page={page}>
-        {label} · hal. {page}
-      </SourcePageLink>
+  // Satu chip per metrik; tiap nomor halaman menjadi tautan ke PDF ("ROA · hal. 4, 7")
+  return (
+    <span key={ref.key} className="chat-ref-chip">
+      {label} · hal.{' '}
+      {pages.map((page, i) => (
+        <span key={page}>
+          {i > 0 && ', '}
+          <SourcePageLink fileId={fileId} fileUrl={fileUrl} page={page}>
+            {page}
+          </SourcePageLink>
+        </span>
+      ))}
     </span>
-  ));
+  );
 }
 
 export default function ChatThread({
@@ -54,6 +72,8 @@ export default function ChatThread({
   error = null,
   onSend,
   autoFocus = false,
+  lockedReason = null, // mis. ringkasan sedang ditulis ulang -> kolom tanya dikunci
+  focusKey = 0,
   emptyHint = 'Tanyakan arti rasio, kondisi tier, atau angka di laporan ini.',
 }) {
   const [draft, setDraft] = useState('');
@@ -62,13 +82,13 @@ export default function ChatThread({
 
   const fileId = session?.analysis?.file_id ?? session?.snapshot?.entity?.file_id ?? null;
   const fileUrl = session?.snapshot?.entity?.file_url ?? (fileId ? `/files/${fileId}.pdf` : null);
-  const isBusy = Boolean(streaming || session?.pending);
+  const isBusy = Boolean(streaming || session?.pending || lockedReason);
 
   useEffect(() => {
     if (autoFocus) {
       inputRef.current?.focus();
     }
-  }, [autoFocus, session?.id]);
+  }, [autoFocus, session?.id, focusKey]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -188,7 +208,9 @@ export default function ChatThread({
           onKeyDown={handleKeyDown}
           disabled={isBusy || !session?.id}
           placeholder={
-            isBusy
+            lockedReason
+              ? lockedReason
+              : isBusy
               ? 'Menunggu jawaban selesai…'
               : 'Tulis pertanyaan… (Enter kirim, Shift+Enter baris baru)'
           }

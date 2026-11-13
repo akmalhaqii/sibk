@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { recompute } from '../api/client.js';
 import ValidationBadge from '../components/ValidationBadge.jsx';
-import MetricCard from '../components/MetricCard.jsx';
+import RatioTable from '../components/RatioTable.jsx';
 import TierCard from '../components/TierCard.jsx';
 import ValuationCard from '../components/ValuationCard.jsx';
 import ExtractionTable from '../components/ExtractionTable.jsx';
@@ -25,15 +25,17 @@ const METRIC_GROUPS = [
   {
     title: 'Profitabilitas',
     items: [
-      { key: 'roe', label: 'ROE', annualizedQuarterly: true },
-      { key: 'roa', label: 'ROA', annualizedQuarterly: true },
-      { key: 'net_margin', label: 'Margin laba bersih', annualizedQuarterly: false },
-      { key: 'operating_margin', label: 'Margin usaha', annualizedQuarterly: false },
+      { key: 'roe', label: 'ROE', annualizedQuarterly: true, desc: 'Laba pemilik entitas induk dibanding rata-rata ekuitasnya.' },
+      { key: 'roa', label: 'ROA', annualizedQuarterly: true, desc: 'Laba bersih dibanding rata-rata total aset.' },
+      { key: 'net_margin', label: 'Margin laba bersih', annualizedQuarterly: false, desc: 'Bagian pendapatan yang tersisa menjadi laba bersih.' },
+      { key: 'operating_margin', label: 'Margin usaha', annualizedQuarterly: false, desc: 'Laba usaha dibanding pendapatan.' },
     ],
   },
   {
     title: 'Likuiditas',
-    items: [{ key: 'current_ratio', label: 'Current ratio', annualizedQuarterly: false }],
+    items: [
+      { key: 'current_ratio', label: 'Current ratio', annualizedQuarterly: false, desc: 'Aset lancar dibanding liabilitas jangka pendek.' },
+    ],
   },
   {
     title: 'Solvabilitas',
@@ -43,17 +45,18 @@ const METRIC_GROUPS = [
         label: 'Liabilitas/ekuitas',
         annualizedQuarterly: false,
         hint: 'Total liabilitas dibagi ekuitas. Bukan DER utang berbunga seperti di situs data saham, jadi nilainya bisa lebih tinggi.',
+        desc: 'Total liabilitas dibagi ekuitas; bukan DER utang berbunga, jadi bisa lebih tinggi dari situs data saham.',
       },
-      { key: 'liability_to_asset', label: 'Liabilitas/aset', annualizedQuarterly: false },
+      { key: 'liability_to_asset', label: 'Liabilitas/aset', annualizedQuarterly: false, desc: 'Bagian aset yang dibiayai liabilitas.' },
     ],
   },
   {
     title: 'Pertumbuhan dan arus kas',
     items: [
-      { key: 'revenue_growth', label: 'Pertumbuhan pendapatan', annualizedQuarterly: false },
-      { key: 'earnings_growth', label: 'Pertumbuhan laba', annualizedQuarterly: false },
-      { key: 'cash_conversion', label: 'Konversi kas', annualizedQuarterly: false },
-      { key: 'ocf_to_assets', label: 'Arus kas operasi/aset', annualizedQuarterly: true },
+      { key: 'revenue_growth', label: 'Pertumbuhan pendapatan', annualizedQuarterly: false, desc: 'Perubahan pendapatan dibanding periode yang sama tahun lalu.' },
+      { key: 'earnings_growth', label: 'Pertumbuhan laba', annualizedQuarterly: false, desc: 'Perubahan laba pemilik entitas induk dibanding periode yang sama tahun lalu.' },
+      { key: 'cash_conversion', label: 'Konversi kas', annualizedQuarterly: false, desc: 'Arus kas operasi dibanding laba bersih.' },
+      { key: 'ocf_to_assets', label: 'Arus kas operasi/aset', annualizedQuarterly: true, desc: 'Arus kas operasi dibanding rata-rata total aset.' },
     ],
   },
 ];
@@ -94,7 +97,10 @@ export default function ResultPage() {
 
   const [narrativeData, setNarrativeData] = useState(null); // FR-OUT-01
   const [narrativeFinished, setNarrativeFinished] = useState(false);
+  // Peluncur muncul setelah ringkasan PERTAMA selesai, lalu tetap tampil (nonaktif) selama ringkasan ditulis ulang
+  const [narrativeEverFinished, setNarrativeEverFinished] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatFocusTick, setChatFocusTick] = useState(0); // klik peluncur saat chat terbuka -> fokus ke kolom tanya
   const [recomputing, setRecomputing] = useState(false);
   const [recomputeError, setRecomputeError] = useState(null);
 
@@ -106,7 +112,12 @@ export default function ResultPage() {
 
   useEffect(() => {
     setChatOpen(false);
+    setNarrativeEverFinished(false);
   }, [result?.entity?.file_id]);
+
+  useEffect(() => {
+    if (narrativeFinished) setNarrativeEverFinished(true);
+  }, [narrativeFinished]);
 
   useEffect(() => {
     if (!state?.result) return;
@@ -188,35 +199,7 @@ export default function ResultPage() {
   }
 
   if (!result) {
-    const showChatLauncher = Boolean(features.chat && narrativeFinished);
-
-  function handleOpenChat() {
-    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
-    if (isNarrow && features.chat_page && chat.session?.id) {
-      navigate(`/chatbot/${chat.session.id}`);
-      return;
-    }
-    setChatOpen(true);
-  }
-
-  function handleAskSample(questionText) {
-    const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
-    if (isNarrow && features.chat_page && chat.session?.id) {
-      chat.send(questionText);
-      navigate(`/chatbot/${chat.session.id}`);
-      return;
-    }
-    setChatOpen(true);
-    chat.send(questionText);
-  }
-
-  function handleExpandChat() {
-    if (chat.session?.id) {
-      navigate(`/chatbot/${chat.session.id}`);
-    }
-  }
-
-  return (
+    return (
       <main className="page-container empty-state card">
         <h1>Belum ada hasil analisis</h1>
         <p>Unggah laporan keuangan PDF terlebih dahulu untuk melihat hasil analisis.</p>
@@ -230,7 +213,11 @@ export default function ResultPage() {
   const { entity, validation, metrics, tiering, market, valuation } = result;
   const isQuarterly = ['Q1', 'Q2', 'Q3', '9M', 'H1'].includes(entity?.period_type);
 
-  const showChatLauncher = Boolean(features.chat && narrativeFinished);
+  const showChatLauncher = Boolean(features.chat && narrativeEverFinished);
+  // Selama Qwen menulis ulang ringkasan (setelah koreksi angka/harga), chat dikunci agar tidak antre di Ollama
+  const narrativeRewriting = narrativeEverFinished && !narrativeFinished;
+  const chatReady = Boolean(chat.session?.id) && !chat.loadingSession;
+  const chatLockedReason = narrativeRewriting ? 'Menunggu ringkasan selesai ditulis ulang…' : null;
 
   function handleOpenChat() {
     const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -239,9 +226,11 @@ export default function ResultPage() {
       return;
     }
     setChatOpen(true);
+    setChatFocusTick((n) => n + 1);
   }
 
   function handleAskSample(questionText) {
+    if (!chatReady || narrativeRewriting) return;
     const isNarrow = typeof window !== 'undefined' && window.innerWidth < 1024;
     if (isNarrow && features.chat_page && chat.session?.id) {
       chat.send(questionText);
@@ -305,15 +294,19 @@ export default function ResultPage() {
               result={result}
               onLoaded={setNarrativeData}
               onFinished={setNarrativeFinished}
+              footer={
+                showChatLauncher ? (
+                  <AssistantLauncher
+                    tier={tiering?.tier}
+                    active={chatOpen}
+                    onOpen={handleOpenChat}
+                    onAskSample={handleAskSample}
+                    disabled={!chatReady || narrativeRewriting}
+                    note={chatLockedReason || (!chatReady ? 'Menyiapkan sesi asisten…' : null)}
+                  />
+                ) : null
+              }
             />
-            {showChatLauncher && !chatOpen && (
-              <AssistantLauncher
-                tier={tiering?.tier}
-                onOpen={handleOpenChat}
-                onAskSample={handleAskSample}
-                disabled={chat.loadingSession}
-              />
-            )}
           </>
         }
         chatSlot={
@@ -326,6 +319,8 @@ export default function ResultPage() {
             busyNotice={chat.busyNotice}
             error={chat.error}
             onSend={chat.send}
+            lockedReason={chatLockedReason}
+            focusKey={chatFocusTick}
             onClose={() => setChatOpen(false)}
             onExpand={handleExpandChat}
             canExpand={Boolean(features.chat_page)}
@@ -336,31 +331,21 @@ export default function ResultPage() {
       {/* Grid Dua Kolom: Metrik (Kiri) & Tier + Valuasi (Kanan) */}
       <div className="dashboard-grid">
         <section className="metrics-column card">
-          <div className="section-header">
-            <h2>Rasio Kesehatan Keuangan</h2>
-            {isQuarterly && (
-              <span className="meta-note">* Rasio berbasis laba/arus kas disetahunkan dari periode {entity.period_type}</span>
-            )}
+          <div className="ratio-heading">
+            <h2>Rasio Performa</h2>
+            <p>
+              Dihitung dari angka laporan {entity?.period_type} {(entity?.period_end ?? '').slice(0, 4)}.
+              {isQuarterly && ' Tanda * berarti disetahunkan dari laporan kuartalan.'} Arahkan kursor ke baris untuk melihat rumus.
+            </p>
           </div>
 
-          <div className="metric-groups">
-            {METRIC_GROUPS.map((group) => (
-              <div key={group.title} className="metric-group">
-                <h3 className="metric-group-title">{group.title}</h3>
-                <div className="metric-cards-grid">
-                  {group.items.map((item) => (
-                    <MetricCard
-                      key={item.key}
-                      label={item.label}
-                      metric={metrics?.[item.key]}
-                      annualized={item.annualizedQuarterly && isQuarterly}
-                      hint={item.hint}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <RatioTable
+            groups={METRIC_GROUPS}
+            metrics={metrics}
+            fields={result.fields}
+            entity={entity}
+            isQuarterly={isQuarterly}
+          />
         </section>
 
         <div className="side-column">

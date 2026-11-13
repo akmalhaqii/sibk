@@ -5,8 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { buildInput } from '../narrator/input.js';
 import { buildStatusSheet } from '../narrator/qualitative.js';
 import { fmtRupiah } from '../format.js';
+import { factLines } from './facts.js';
 
-const PROMPT_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'prompts/chat_v1.txt');
+const PROMPT_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'prompts/chat_v2.txt');
 const MAX_TOTAL_CHARS = 6000; // ~1500 token
 
 const MONTHS_ID = [
@@ -36,7 +37,7 @@ function buildValuationLine(snapshot = {}) {
     const reason = v.per?.unavailable_reason ?? v.fair_value?.unavailable_reason ?? 'harga saham belum tersedia';
     return `- Valuasi: belum dapat dihitung (${reason})`;
   }
-  const parts = [`harga saham ${fmtRupiah(price)} (${snapshot.market.source === 'manual' ? 'manual' : snapshot.market.source})`];
+  const parts = [`harga saham ${fmtRupiah(price)}`];
   if (v.per?.display && v.per.display !== '—') parts.push(`PER ${v.per.display}`);
   if (v.pbv?.display && v.pbv.display !== '—') parts.push(`PBV ${v.pbv.display}`);
   if (v.ps?.display && v.ps.display !== '—') parts.push(`P/S ${v.ps.display}`);
@@ -59,7 +60,11 @@ export function buildChatMessages({ session, question }) {
   const input = buildInput(snapshot);
   const rawSheet = buildStatusSheet(input, { withNumbers: true });
   // Ganti baris "- Valuasi: ..." agar angka PER, PBV, harga, dan nilai wajar tersedia di DATA
-  const status = rawSheet.replace(/^- Valuasi:.*$/m, buildValuationLine(snapshot));
+  // Tambah angka laporan (laba, pendapatan, aset, ...) agar "berapa labanya?" bisa dijawab dari DATA
+  const facts = factLines(snapshot);
+  const status = rawSheet
+    .replace(/^- Valuasi:.*$/m, buildValuationLine(snapshot))
+    .replace(/^(- Keterbatasan:)/m, facts ? `${facts}\n$1` : '$1');
 
   const template = fs.readFileSync(PROMPT_PATH, 'utf8');
   const systemContent = template

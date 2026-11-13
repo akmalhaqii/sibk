@@ -28,8 +28,6 @@ const ALIASES = [
   ['ocf_to_assets', ['arus kas operasi terhadap aset', 'arus kas terhadap aset', 'ocf to assets']],
   // Istilah yang tidak punya angka di data narasi: angka yang ditempel padanya selalu ditolak
   ['@none', ['arus kas bersih', 'arus kas tahunan', 'arus kas investasi', 'arus kas pendanaan', 'kas bersih', 'laba kotor', 'laba usaha']],
-  ['@page', ['halaman', 'hal']],
-  ['@threshold', ['ambang batas', 'ambang', 'batas', 'minimum', 'maksimal', 'standar']],
   ['@cash', ['arus kas operasi', 'arus kas']],
   // "Pendapatan emiten mengalami pertumbuhan -10,3%": angka boleh milik salah satu metrik pertumbuhan
   ['@growth', ['pertumbuhan', 'tumbuh', 'bertumbuh']],
@@ -78,8 +76,6 @@ export function buildCatalog(input = {}) {
   }
   cat['@valuation'] = { displays: valDisplays, status: null };
   cat['@none'] = { displays: new Set(), status: null };
-  cat['@page'] = { displays: new Set(), status: null };
-  cat['@threshold'] = { displays: new Set(), status: null };
   for (const [g, members] of Object.entries(GROUPS)) {
     const displays = new Set();
     for (const m of members) for (const d of cat[m]?.displays ?? []) displays.add(d);
@@ -92,12 +88,17 @@ const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
 const ALIAS_LIST = ALIASES.flatMap(([key, names]) => names.map((name) => ({ key, name })))
   .sort((a, b) => b.name.length - a.name.length);
 
+// Alias tambahan khusus chat (halaman, ambang, pos laporan) dibawa lewat katalog: catalog['@extraAliases'].
+// Narasi tidak memakainya, sehingga aturan ringkasan eksekutif tetap sama seperti sebelum chatbot.
+const listWithExtra = (extra) =>
+  extra?.length ? [...extra, ...ALIAS_LIST].sort((a, b) => b.name.length - a.name.length) : ALIAS_LIST;
+
 // Temukan semua kemunculan alias (tanpa tumpang tindih; alias terpanjang menang)
-export function findAliases(sentence) {
+export function findAliases(sentence, extra = null) {
   const lower = sentence.toLowerCase();
   const taken = new Array(lower.length).fill(false);
   const hits = [];
-  for (const { key, name } of ALIAS_LIST) {
+  for (const { key, name } of listWithExtra(extra)) {
     const re = new RegExp(`(?<![\\p{L}\\d])${escapeRe(name)}(?![\\p{L}\\d])`, 'gu');
     let m;
     while ((m = re.exec(lower))) {
@@ -133,7 +134,7 @@ function findNumbers(sentence) {
 
 // Periksa satu kalimat. Hasil: { ok, reason, bound } — bound = jumlah angka yang terikat benar.
 export function checkSentenceBinding(sentence, catalog) {
-  const aliases = findAliases(sentence);
+  const aliases = findAliases(sentence, catalog?.['@extraAliases']);
   const numbers = findNumbers(sentence);
   let bound = 0;
   let prevEnd = 0;

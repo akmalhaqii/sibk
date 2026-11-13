@@ -5,6 +5,18 @@ import env from '../config/env.js';
 import { fmtPct, fmtMultiple } from '../format.js';
 import { buildCatalog } from '../narrator/binding.js';
 import { checkQualitativeSentence } from '../narrator/qualitative.js';
+import { factAliases, factCatalogEntries } from './facts.js';
+
+// Alias khusus chat (tidak dipakai pemeriksa ringkasan eksekutif)
+const CHAT_ALIASES = [
+  ...[['@page', ['halaman', 'hal']], ['@threshold', ['ambang batas', 'ambang', 'batas', 'minimum', 'maksimal', 'standar']]].flatMap(
+    ([key, names]) => names.map((name) => ({ key, name }))
+  ),
+  ...factAliases(),
+  // Frasa pertumbuhan di DATA lebih panjang dari alias pos laporan "laba pemilik entitas induk"
+  { key: 'earnings_growth', name: 'pertumbuhan laba pemilik entitas induk' },
+  { key: 'earnings_growth', name: 'pertumbuhan laba yang diatribusikan kepada pemilik entitas induk' },
+];
 
 export const CHAT_FORBIDDEN_RE =
   /\b(beli|membeli|dibeli|jual|menjual|dijual|tahan|hold|buy|sell|layak|worth it|target harga|price target|potensi naik|cuan|entry|cut ?loss|average down|averaging|rekomendasi|rekomendasikan|sebaiknya (?:saya )?(?:beli|jual|masuk|keluar)|masuk (?:di|ke) harga|investasi(?:kan)? di|undervalued|overvalued|(?:murah|mahal)\s+untuk\s+dibeli)\b/i;
@@ -45,6 +57,7 @@ function formatThresholdVariants(key, num) {
 export function extendCatalog(baseCatalog = {}, result = {}) {
   const cat = {};
   for (const [k, v] of Object.entries(baseCatalog)) {
+    if (k === '@extraAliases') continue;
     cat[k] = {
       ...v,
       displays: new Set(v?.displays ?? []),
@@ -77,6 +90,10 @@ export function extendCatalog(baseCatalog = {}, result = {}) {
     }
   }
   cat['@threshold'] = { displays: thAll, status: null };
+
+  // 4. Angka laporan (laba, pendapatan, aset, ...) dalam Rupiah juta/miliar/triliun, sama persis dengan DATA
+  Object.assign(cat, factCatalogEntries(result));
+  cat['@extraAliases'] = CHAT_ALIASES;
 
   return cat;
 }

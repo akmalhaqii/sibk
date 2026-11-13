@@ -987,7 +987,7 @@ h1, h2, h3, p {
   grid-template-columns: 2fr 1fr;
   gap: 20px;
   align-items: stretch;
-  margin-bottom: 18px;
+  /* tanpa margin: jarak antarkartu sudah diatur gap .result-page, jadi kartu di bawah tidak bergeser saat chat dibuka */
 }
 
 .summary-row-open .summary-main {
@@ -1000,6 +1000,24 @@ h1, h2, h3, p {
 .summary-row-open .NarrativePanel {
   margin-bottom: 0;
   flex: 1;
+}
+
+/* Kartu ringkasan: kolom flex agar footer (peluncur) selalu di dasar kartu, juga saat kartu diregangkan
+   setinggi kartu chat. Tinggi baris = tinggi kartu ringkasan (min 380 px saat chat terbuka). */
+.NarrativePanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.narrative-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* jarak minimum di atas garis pemisah (margin-top: auto bisa 0 bila kartu tidak diregangkan) */
+.NarrativePanel > :has(+ .narrative-footer) {
+  margin-bottom: 14px;
 }
 
 .mini-chat-slot {
@@ -1096,7 +1114,22 @@ h1, h2, h3, p {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: -6px 0 18px;
+}
+
+.assistant-launcher-active .btn-assistant-launch {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.assistant-launcher-active .btn-assistant-launch:hover {
+  background: #1e40af;
+}
+
+.assistant-launcher-note {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
 }
 
 .btn-assistant-launch {
@@ -1243,13 +1276,28 @@ h1, h2, h3, p {
   color: #1d4ed8;
 }
 
+.chat-ref-chip {
+  display: inline-block; /* bukan flex, supaya spasi "hal. 4, 7" tidak hilang */
+  white-space: nowrap;
+}
+
+/* Di dalam chip, tautan halaman tampil sebagai teks bergaris bawah, bukan kotak kedua */
 .chat-ref-chip .SourcePageLink {
+  display: inline;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  font-size: inherit;
+  font-weight: 600;
   color: #1d4ed8;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .chat-ref-chip .SourcePageLink:hover {
-  text-decoration: underline;
+  background: none;
+  color: #1e3a8a;
 }
 
 .chat-dropped-note {
@@ -1615,5 +1663,248 @@ h1, h2, h3, p {
   .assistant-launcher,
   .no-print {
     display: none !important;
+  }
+}
+
+/* ===== Rasio Performa: tabel (gaya desain Figma, dicakup .ratio-* agar tidak mengubah tabel lain) ===== */
+.ratio-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ratio-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 30px;
+  color: #202836;
+}
+
+.ratio-heading p {
+  margin: 0;
+  color: #535c68;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.ratio-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ratio-group-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #202836;
+}
+
+.ratio-table-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dcd9d0;
+  border-radius: 10px;
+  background: #fffefa;
+}
+
+.ratio-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: #202836;
+}
+
+.ratio-table th,
+.ratio-table td {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 20px;
+  vertical-align: top;
+}
+
+.ratio-table thead th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  color: #535c68;
+  background: #efeee8;
+  font-weight: 400;
+}
+
+.ratio-table thead th:nth-child(1) { width: 24%; }
+.ratio-table thead th:nth-child(2) { width: 13%; }
+.ratio-table thead th:nth-child(3) { width: 15%; }
+.ratio-table thead th:nth-child(4) { width: 33%; }
+.ratio-table thead th:nth-child(5) { width: 15%; }
+
+.ratio-table tbody tr {
+  border-top: 1px solid #dcd9d0;
+}
+
+.ratio-table tbody tr.ratio-row-alt {
+  background: #f5f3ed;
+}
+
+.ratio-table .ratio-group-row th {
+  padding-top: 10px;
+  padding-bottom: 6px;
+  background: #fffefa;
+  color: #535c68;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ratio-table .ratio-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ratio-table .ratio-value {
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ratio-table thead .ratio-value {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.ratio-table .ratio-desc {
+  color: #535c68;
+}
+
+.ratio-row-null .ratio-value,
+.ratio-row-null .ratio-name {
+  color: #94a3b8;
+}
+
+.ratio-status {
+  margin-top: -3px;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ratio-status-sehat { color: #294e9b; background: #e7edf9; }
+.ratio-status-waspada { color: #8a5a00; background: #f6e7c4; }
+.ratio-status-lemah { color: #a1302b; background: #f6dedc; }
+
+.ratio-muted {
+  color: #8b9098;
+  font-size: 13px;
+}
+
+/* Rujukan: tautan teks (bukan kotak SourcePageLink) */
+.ratio-refs {
+  color: #294e9b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ratio-refs .SourcePageLink {
+  display: inline;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: #294e9b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ratio-refs .SourcePageLink:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+/* Layar sempit: setiap baris jadi kartu dengan label kolom */
+@media (max-width: 760px) {
+  .ratio-table-card {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .ratio-table,
+  .ratio-table tbody,
+  .ratio-table tr,
+  .ratio-table th,
+  .ratio-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .ratio-table thead {
+    display: none;
+  }
+
+  .ratio-table tbody {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .ratio-table tbody tr {
+    padding: 14px;
+    border: 1px solid #dcd9d0;
+    border-radius: 10px;
+    background: #fffefa;
+  }
+
+  .ratio-table tbody tr.ratio-row-alt {
+    background: #fffefa;
+  }
+
+  .ratio-table .ratio-group-row {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .ratio-table .ratio-group-row th {
+    padding: 4px 0 0;
+    background: transparent;
+  }
+
+  .ratio-table tbody th,
+  .ratio-table tbody td {
+    padding: 4px 0;
+  }
+
+  .ratio-table .ratio-name {
+    margin-bottom: 4px;
+    font-size: 17px;
+  }
+
+  .ratio-table tbody td::before {
+    content: attr(data-label) ": ";
+    color: #535c68;
+    font-weight: 400;
+  }
+
+  .ratio-table .ratio-value {
+    text-align: left;
+  }
+}
+
+@media print {
+  .ratio-table tbody tr.ratio-row-alt {
+    background: #f5f3ed !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

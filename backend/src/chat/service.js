@@ -10,8 +10,9 @@ import { createSentenceSplitter } from './splitter.js';
 import { checkChatSentence, extendCatalog } from './check.js';
 import { buildChatMessages } from './context.js';
 import { acquireChatLock } from './lock.js';
+import { collectFacts, factsInQuestion } from './facts.js';
 
-const CHAT_PROMPT_VERSION = 'chat_v1';
+const CHAT_PROMPT_VERSION = 'chat_v2';
 
 function pagesOf(result, key) {
   const inputs = result?.metrics?.[key]?.inputs ?? result?.valuation?.[key]?.inputs ?? [];
@@ -19,11 +20,20 @@ function pagesOf(result, key) {
   return [...new Set(pages)].sort((a, b) => a - b);
 }
 
-export function extractRefs(text, snapshot) {
+export function extractRefs(text, snapshot, extraAliases = null) {
   if (!text || !snapshot) return [];
   const seen = new Set();
   const refs = [];
-  for (const h of findAliases(text)) {
+  for (const h of findAliases(text, extraAliases)) {
+    if (h.key.startsWith('@fact_')) {
+      const k = h.key.slice(6);
+      const page = snapshot.fields?.[k]?.page;
+      if (!seen.has(k) && snapshot.fields?.[k]) {
+        seen.add(k);
+        refs.push({ type: 'field', key: k, pages: Number.isFinite(page) ? [page] : [] });
+      }
+      continue;
+    }
     const keys =
       h.key === '@growth'
         ? ['revenue_growth', 'earnings_growth']
@@ -152,9 +162,15 @@ export async function answerQuestion({
     let timedOut = false;
     let streamError = null;
 
+    // "Data laba tidak tersedia" padahal pos yang ditanyakan ada di laporan -> kalimat dibuang (lalu jawaban aturan)
+    const availableFacts = new Set(collectFacts(snapshot).map((f) => f.key));
+    const askedAvailable = factsInQuestion(cleanQ).some((k) => availableFacts.has(k));
     const considerSentence = (rawSent) => {
       if (kept.length >= 4) return;
-      const verdict = checkChatSentence(rawSent, input, catalog);
+      const verdict =
+        askedAvailable && /\b(tidak|belum)\s+(tersedia|ada|tercantum|disebutkan)\b/i.test(rawSent)
+          ? { ok: false, reason: 'menyebut data tidak tersedia padahal ada di laporan' }
+          : checkChatSentence(rawSent, input, catalog);
       if (verdict.ok) {
         kept.push(rawSent);
         emit('sentence', { text: rawSent });
@@ -203,7 +219,7 @@ export async function answerQuestion({
           kept[kept.length - 1] = `${kept[kept.length - 1]} ${note}`;
         }
         finalText = kept.join(' ');
-        finalRefs = extractRefs(finalText, snapshot);
+        finalRefs = extractRefs(finalText, snapshot, catalog['@extraAliases']);
       } else {
         const rule = ruleAnswer(cleanQ, snapshot);
         finalText = `${rule.answer} Jawaban terpotong karena Qwen terlalu lama.`;
@@ -247,7 +263,7 @@ export async function answerQuestion({
         emit('sentence', { text: finalText });
       } else {
         finalText = kept.join(' ');
-        finalRefs = extractRefs(finalText, snapshot);
+        finalRefs = extractRefs(finalText, snapshot, catalog['@extraAliases']);
       }
     }
 

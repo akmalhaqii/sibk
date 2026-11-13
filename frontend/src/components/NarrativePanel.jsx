@@ -23,7 +23,8 @@ function cleanPlainText(raw = '') {
     .join('\n\n');
 }
 
-export default function NarrativePanel({ result, onLoaded, onFinished }) {
+// footer: konten di dasar kartu (peluncur Asisten AI), dipisah garis; tidak ikut tercetak
+export default function NarrativePanel({ result, onLoaded, onFinished, footer = null }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -114,6 +115,8 @@ export default function NarrativePanel({ result, onLoaded, onFinished }) {
       )}
 
       {!loading && note && <p className="meta-note">{note}</p>}
+
+      {footer && <div className="narrative-footer no-print">{footer}</div>}
     </section>
   );
 }

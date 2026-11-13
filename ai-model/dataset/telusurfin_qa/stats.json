@@ -1,0 +1,170 @@
+{
+  "seed": 20261113,
+  "generated_at": "2026-11-12T21:24:06.399Z",
+  "totals": {
+    "train": 9000,
+    "holdout": 1000,
+    "all": 10000
+  },
+  "by_category": {
+    "train": {
+      "data": 6120,
+      "refusal": 630,
+      "concept": 1350,
+      "glossary": 900
+    },
+    "holdout": {
+      "concept": 150,
+      "refusal": 70,
+      "glossary": 100,
+      "data": 680
+    }
+  },
+  "by_task": {
+    "train": {
+      "net_margin": 427,
+      "roa": 455,
+      "der": 376,
+      "summary": 905,
+      "refusal_out_of_scope": 58,
+      "roe": 572,
+      "concept_rasio": 186,
+      "liability_to_asset": 349,
+      "current_ratio": 403,
+      "valuation": 352,
+      "glossary_thresh": 88,
+      "refusal_advice": 371,
+      "concept_telusurfin": 108,
+      "revenue_growth": 360,
+      "status": 257,
+      "concept_valuasi": 136,
+      "units": 189,
+      "concept_pasar_modal": 303,
+      "glossary_why": 91,
+      "glossary_def": 461,
+      "cash_conversion": 321,
+      "refusal_company_number": 161,
+      "earnings_growth": 333,
+      "honesty": 148,
+      "balance_check": 348,
+      "compare": 288,
+      "concept_laporan_keuangan": 198,
+      "concept_psak": 215,
+      "concept_arus_kas": 94,
+      "glossary_formula": 121,
+      "concept_literasi": 110,
+      "refusal_illegal": 40,
+      "glossary_note": 82,
+      "glossary_pair": 57,
+      "loss": 37
+    },
+    "holdout": {
+      "concept_rasio": 21,
+      "refusal_advice": 49,
+      "concept_pasar_modal": 37,
+      "glossary_why": 20,
+      "cash_conversion": 36,
+      "roa": 41,
+      "glossary_formula": 16,
+      "roe": 62,
+      "units": 25,
+      "concept_telusurfin": 11,
+      "refusal_company_number": 19,
+      "balance_check": 37,
+      "net_margin": 45,
+      "current_ratio": 63,
+      "summary": 87,
+      "refusal_out_of_scope": 2,
+      "liability_to_asset": 39,
+      "glossary_def": 19,
+      "earnings_growth": 38,
+      "status": 27,
+      "compare": 30,
+      "concept_literasi": 10,
+      "revenue_growth": 38,
+      "der": 45,
+      "honesty": 16,
+      "valuation": 50,
+      "glossary_thresh": 21,
+      "concept_psak": 22,
+      "concept_laporan_keuangan": 26,
+      "glossary_note": 19,
+      "glossary_pair": 5,
+      "concept_arus_kas": 10,
+      "loss": 1,
+      "concept_valuasi": 13
+    }
+  },
+  "chars": {
+    "user": {
+      "min": 4,
+      "median": 116,
+      "max": 528
+    },
+    "assistant": {
+      "min": 61,
+      "median": 295,
+      "max": 722
+    }
+  },
+  "holdout_source_tickers": [
+    "AIMS",
+    "BATR",
+    "BELI",
+    "CSMI",
+    "DEPO",
+    "GEMA",
+    "GJTL",
+    "GRPH",
+    "GTRA",
+    "IFII",
+    "INTP",
+    "ISSP",
+    "JATI",
+    "JECC",
+    "KMDS",
+    "KREN",
+    "LTLS",
+    "MAHA",
+    "MAXI",
+    "MBSS",
+    "MGRO",
+    "MLPT",
+    "MUTU",
+    "NICE",
+    "OBMD",
+    "OPMS",
+    "PDPP",
+    "PGUN",
+    "PNSE",
+    "PRDA",
+    "PTPW",
+    "RAAM",
+    "SCNP",
+    "SEMA",
+    "SICO",
+    "SIDO",
+    "SIMP",
+    "SPRE",
+    "YELO",
+    "YPAS"
+  ],
+  "quota_met": {
+    "data": {
+      "train": true,
+      "holdout": true
+    },
+    "glossary": {
+      "train": true,
+      "holdout": true
+    },
+    "concept": {
+      "train": true,
+      "holdout": true
+    },
+    "refusal": {
+      "train": true,
+      "holdout": true
+    }
+  }
+}

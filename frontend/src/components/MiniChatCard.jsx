@@ -14,6 +14,8 @@ export default function MiniChatCard({
   onClose,
   onExpand,
   canExpand = true,
+  lockedReason = null,
+  focusKey = 0,
 }) {
   useEffect(() => {
     const handleKey = (e) => {
@@ -70,6 +72,8 @@ export default function MiniChatCard({
           busyNotice={busyNotice}
           error={error}
           onSend={onSend}
+          lockedReason={lockedReason}
+          focusKey={focusKey}
           autoFocus
         />
       </div>

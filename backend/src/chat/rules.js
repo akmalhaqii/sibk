@@ -3,6 +3,7 @@
 import { buildInput } from '../narrator/input.js';
 import { qualitativeSummary } from '../narrator/qualitative.js';
 import { thresholdText } from './glossary.js';
+import { collectFacts, factsInQuestion } from './facts.js';
 
 export const LABELS = {
   glossary: 'Dari kamus TelusurFin',
@@ -176,6 +177,19 @@ export function ruleAnswer(question, result) {
     if (s) {
       sentences.push(s);
       refs.push(ref(result, k));
+    }
+  }
+  // Angka laporan yang ditanyakan ("Berapa laba bersihnya?"): langsung dari PDF, dengan halaman
+  const asksAmount = /\b(berapa|jumlah|total|nilai(?:nya)?|besar(?:nya)?|sebesar|angka(?:nya)?|halaman)\b/i.test(q);
+  const askedFacts = asksAmount ? factsInQuestion(q) : [];
+  if (askedFacts.length) {
+    const byKey = Object.fromEntries(collectFacts(result).map((f) => [f.key, f]));
+    for (const k of askedFacts) {
+      const f = byKey[k];
+      if (!f) continue;
+      const label = f.label.charAt(0).toUpperCase() + f.label.slice(1);
+      sentences.unshift(`${label} ${result.entity?.ticker ?? 'emiten'} ${period(result)} ${f.display}${f.page ? `, tercantum di halaman ${f.page}` : ''}.`.replace(/\s+/g, ' '));
+      refs.unshift({ type: 'field', key: k, pages: f.page ? [f.page] : [] });
     }
   }
   if (TIER_RE.test(q)) sentences.push(tierSentence(result));
